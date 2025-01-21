@@ -3,84 +3,63 @@ package main
 import (
 	"context"
 	"os"
-	"strings"
+	"os/signal"
+	"syscall"
 
-	"github.com/charmbracelet/glamour"
-	"github.com/charmbracelet/huh"
-	"github.com/muesli/termenv"
+	"github.com/adrianliechti/wingman/pkg/chat"
+	"github.com/adrianliechti/wingman/pkg/cli"
+	"github.com/adrianliechti/wingman/pkg/coder"
+
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 )
 
+var version string
+
 func main() {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
+	defer stop()
 
-	output := termenv.NewOutput(os.Stdout)
+	app := initApp()
 
+	if err := app.Run(ctx, os.Args); err != nil {
+		cli.Fatal(err)
+	}
+}
+
+func initApp() cli.Command {
 	client := openai.NewClient(
 		option.WithBaseURL("http://localhost:8080/v1/"),
 		option.WithAPIKey("-"),
 	)
 
-	param := openai.ChatCompletionNewParams{
-		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{}),
-		Model:    openai.F(openai.ChatModelGPT4o),
-	}
+	model := openai.ChatModelGPT4o
 
-	println()
+	return cli.Command{
+		Usage: "Wingman AI CLI",
 
-	for {
-		var prompt string
+		Suggest: true,
+		Version: version,
 
-		if err := huh.NewText().
-			Value(&prompt).
-			Run(); err != nil {
-			break
-		}
+		HideHelpCommand: true,
 
-		prompt = strings.TrimSpace(prompt)
+		Commands: []*cli.Command{
+			{
+				Name:  "chat",
+				Usage: "AI Chat",
 
-		if prompt == "" {
-			continue
-		}
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					return chat.Run(ctx, client, model)
+				},
+			},
+			{
+				Name:  "coder",
+				Usage: "AI Coder",
 
-		param.Messages.Value = append(param.Messages.Value, openai.UserMessage(prompt))
-
-		println("> " + prompt)
-		output.HideCursor()
-		output.SaveCursorPosition()
-
-		stream := client.Chat.Completions.NewStreaming(ctx, param)
-		acc := openai.ChatCompletionAccumulator{}
-
-		for stream.Next() {
-			chunk := stream.Current()
-			acc.AddChunk(chunk)
-
-			content := acc.Choices[0].Message.Content
-
-			output.RestoreCursorPosition()
-			output.ClearLine()
-
-			out, _ := glamour.Render(content, "auto")
-			output.WriteString(out)
-		}
-
-		if err := stream.Err(); err != nil {
-			panic(err)
-		}
-
-		output.RestoreCursorPosition()
-		output.ClearLine()
-		output.ShowCursor()
-
-		content := acc.Choices[0].Message.Content
-		out, _ := glamour.Render(content, "auto")
-
-		output.WriteString(out)
-
-		println()
-
-		param.Messages.Value = append(param.Messages.Value, acc.Choices[0].Message)
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					return coder.Run(ctx, client, model, "")
+				},
+			},
+		},
 	}
 }
