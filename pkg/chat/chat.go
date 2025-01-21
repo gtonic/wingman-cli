@@ -8,18 +8,17 @@ import (
 
 	"github.com/adrianliechti/wingman/pkg/markdown"
 
-	"github.com/openai/openai-go"
-
 	"github.com/charmbracelet/huh"
 	"github.com/muesli/termenv"
+	"github.com/openai/openai-go"
 )
 
 func Run(ctx context.Context, client *openai.Client, model string) error {
 	output := termenv.NewOutput(os.Stdout)
 
 	param := openai.ChatCompletionNewParams{
-		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{}),
 		Model:    openai.F(model),
+		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{}),
 	}
 
 	output.WriteString("\n")

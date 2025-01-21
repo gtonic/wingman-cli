@@ -11,10 +11,9 @@ import (
 	"github.com/adrianliechti/wingman/pkg/fs"
 	"github.com/adrianliechti/wingman/pkg/markdown"
 
-	"github.com/openai/openai-go"
-
 	"github.com/charmbracelet/huh"
 	"github.com/muesli/termenv"
+	"github.com/openai/openai-go"
 )
 
 var (

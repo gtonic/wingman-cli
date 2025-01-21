@@ -4,11 +4,13 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/adrianliechti/wingman/pkg/chat"
 	"github.com/adrianliechti/wingman/pkg/cli"
 	"github.com/adrianliechti/wingman/pkg/coder"
+	"github.com/adrianliechti/wingman/pkg/completer"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -78,6 +80,15 @@ func initApp() cli.Command {
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					return coder.Run(ctx, client, defaultModel, "")
+				},
+			},
+			{
+				Name:  "complete",
+				Usage: "AI Completer",
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					prompt := strings.Join(cmd.Args().Slice(), " ")
+					return completer.Run(ctx, client, defaultModel, prompt)
 				},
 			},
 		},
