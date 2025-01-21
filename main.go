@@ -28,12 +28,32 @@ func main() {
 }
 
 func initApp() cli.Command {
-	client := openai.NewClient(
-		option.WithBaseURL("http://localhost:8080/v1/"),
-		option.WithAPIKey("-"),
-	)
+	apiKey := os.Getenv("OPENAI_API_KEY")
 
-	model := openai.ChatModelGPT4o
+	if apiKey == "" {
+		apiKey = "-"
+	}
+
+	baseURL := os.Getenv("OPENAI_BASE_URL")
+
+	if baseURL == "" {
+		baseURL = "https://api.openai.com/v1/"
+
+		if apiKey == "-" {
+			baseURL = "http://localhost:8080/v1/"
+		}
+	}
+
+	defaultModel := os.Getenv("OPENAI_MODEL")
+
+	if defaultModel == "" {
+		defaultModel = openai.ChatModelGPT4o
+	}
+
+	client := openai.NewClient(
+		option.WithAPIKey(apiKey),
+		option.WithBaseURL(baseURL),
+	)
 
 	return cli.Command{
 		Usage: "Wingman AI CLI",
@@ -49,7 +69,7 @@ func initApp() cli.Command {
 				Usage: "AI Chat",
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return chat.Run(ctx, client, model)
+					return chat.Run(ctx, client, defaultModel)
 				},
 			},
 			{
@@ -57,7 +77,7 @@ func initApp() cli.Command {
 				Usage: "AI Coder",
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return coder.Run(ctx, client, model, "")
+					return coder.Run(ctx, client, defaultModel, "")
 				},
 			},
 		},
