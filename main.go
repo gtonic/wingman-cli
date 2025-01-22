@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"os"
 	"os/signal"
 	"strings"
@@ -65,6 +66,31 @@ func initApp() cli.Command {
 
 		HideHelpCommand: true,
 
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			prompt := strings.TrimSpace(strings.Join(cmd.Args().Slice(), " "))
+
+			if input := readInput(); input != "" {
+				if prompt == "" {
+					prompt += "Analyze the following input\n"
+					prompt += "Explain your findings\n"
+					prompt += "Give reommendations based on your observations\n"
+					prompt += "If you see problems or errors, propose solutions\n"
+					prompt += "\n"
+					prompt += "Input:\n"
+					prompt += input
+				}
+
+				return completer.Run(ctx, client, defaultModel, prompt)
+			}
+
+			if cmd.Args().Len() > 0 {
+				return completer.Run(ctx, client, defaultModel, prompt)
+			}
+
+			cli.ShowAppHelp(cmd)
+			return nil
+		},
+
 		Commands: []*cli.Command{
 			{
 				Name:  "chat",
@@ -74,6 +100,7 @@ func initApp() cli.Command {
 					return chat.Run(ctx, client, defaultModel)
 				},
 			},
+
 			{
 				Name:  "coder",
 				Usage: "AI Coder",
@@ -82,15 +109,26 @@ func initApp() cli.Command {
 					return coder.Run(ctx, client, defaultModel, "")
 				},
 			},
-			{
-				Name:  "complete",
-				Usage: "AI Completer",
-
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					prompt := strings.Join(cmd.Args().Slice(), " ")
-					return completer.Run(ctx, client, defaultModel, prompt)
-				},
-			},
 		},
 	}
+}
+
+func readInput() string {
+	fi, err := os.Stdin.Stat()
+
+	if err != nil {
+		return ""
+	}
+
+	if fi.Mode()&os.ModeNamedPipe == 0 {
+		return ""
+	}
+
+	data, err := io.ReadAll(os.Stdin)
+
+	if err != nil {
+		return ""
+	}
+
+	return string(data)
 }

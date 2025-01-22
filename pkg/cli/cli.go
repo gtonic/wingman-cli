@@ -21,6 +21,10 @@ type StringFlag = cli.StringFlag
 type StringSliceFlag = cli.StringSliceFlag
 type BoolFlag = cli.BoolFlag
 
+func ShowAppHelp(cmd *Command) {
+	cli.ShowAppHelp(cmd)
+}
+
 func Info(v ...interface{}) {
 	os.Stdout.WriteString(fmt.Sprintln(v...))
 }
