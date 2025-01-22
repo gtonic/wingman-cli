@@ -2,12 +2,8 @@ package completer
 
 import (
 	"context"
-	"os"
 	"strings"
 
-	"github.com/adrianliechti/wingman/pkg/markdown"
-
-	"github.com/muesli/termenv"
 	"github.com/openai/openai-go"
 )
 
@@ -18,7 +14,7 @@ func Run(ctx context.Context, client *openai.Client, model, prompt string) error
 		return nil
 	}
 
-	output := termenv.NewOutput(os.Stdout)
+	//output := termenv.NewOutput(os.Stdout)
 
 	param := openai.ChatCompletionNewParams{
 		Model: openai.F(model),
@@ -27,8 +23,8 @@ func Run(ctx context.Context, client *openai.Client, model, prompt string) error
 		}),
 	}
 
-	output.HideCursor()
-	output.SaveCursorPosition()
+	// output.HideCursor()
+	// output.SaveCursorPosition()
 
 	acc := openai.ChatCompletionAccumulator{}
 	stream := client.Chat.Completions.NewStreaming(ctx, param)
@@ -37,23 +33,28 @@ func Run(ctx context.Context, client *openai.Client, model, prompt string) error
 		chunk := stream.Current()
 		acc.AddChunk(chunk)
 
-		output.RestoreCursorPosition()
-		output.ClearLine()
+		// output.RestoreCursorPosition()
+		// output.ClearLine()
 
-		content := acc.Choices[0].Message.Content
-		markdown.Render(output, content)
+		// content := acc.Choices[0].Message.Content
+		// markdown.Render(output, content)
+
+		content := chunk.Choices[0].Delta.Content
+		print(content)
 	}
 
 	if err := stream.Err(); err != nil {
 		return err
 	}
 
-	output.RestoreCursorPosition()
-	output.ClearLine()
-	output.ShowCursor()
+	println()
 
-	content := acc.Choices[0].Message.Content
-	markdown.Render(output, content)
+	// output.RestoreCursorPosition()
+	// output.ClearLine()
+	// output.ShowCursor()
+
+	// content := acc.Choices[0].Message.Content
+	// markdown.Render(output, content)
 
 	return nil
 }

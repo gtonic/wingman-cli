@@ -3,25 +3,22 @@ package chat
 import (
 	"context"
 	"errors"
-	"os"
 	"strings"
 
-	"github.com/adrianliechti/wingman/pkg/markdown"
-
 	"github.com/charmbracelet/huh"
-	"github.com/muesli/termenv"
 	"github.com/openai/openai-go"
 )
 
 func Run(ctx context.Context, client *openai.Client, model string) error {
-	output := termenv.NewOutput(os.Stdout)
+	//output := termenv.NewOutput(os.Stdout)
 
 	param := openai.ChatCompletionNewParams{
 		Model:    openai.F(model),
 		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{}),
 	}
 
-	output.WriteString("\n")
+	println()
+	//output.WriteString("\n")
 
 	for {
 		var prompt string
@@ -43,13 +40,15 @@ func Run(ctx context.Context, client *openai.Client, model string) error {
 			continue
 		}
 
-		output.WriteString("> " + prompt)
-		output.WriteString("\n")
+		// output.WriteString("> " + prompt)
+		// output.WriteString("\n")
+		println("> " + prompt)
+		println()
 
 		param.Messages.Value = append(param.Messages.Value, openai.UserMessage(prompt))
 
-		output.HideCursor()
-		output.SaveCursorPosition()
+		//output.HideCursor()
+		//output.SaveCursorPosition()
 
 		acc := openai.ChatCompletionAccumulator{}
 		stream := client.Chat.Completions.NewStreaming(ctx, param)
@@ -58,24 +57,30 @@ func Run(ctx context.Context, client *openai.Client, model string) error {
 			chunk := stream.Current()
 			acc.AddChunk(chunk)
 
-			output.RestoreCursorPosition()
-			output.ClearLine()
+			// output.RestoreCursorPosition()
+			// output.ClearLine()
 
-			content := acc.Choices[0].Message.Content
-			markdown.Render(output, content)
+			// content := acc.Choices[0].Message.Content
+			// markdown.Render(output, content)
+
+			content := chunk.Choices[0].Delta.Content
+			print(content)
 		}
 
 		if err := stream.Err(); err != nil {
 			return err
 		}
 
+		println()
+		println()
+
 		param.Messages.Value = append(param.Messages.Value, acc.Choices[0].Message)
 
-		output.RestoreCursorPosition()
-		output.ClearLine()
-		output.ShowCursor()
+		// output.RestoreCursorPosition()
+		// output.ClearLine()
+		// output.ShowCursor()
 
-		content := acc.Choices[0].Message.Content
-		markdown.Render(output, content)
+		// content := acc.Choices[0].Message.Content
+		// markdown.Render(output, content)
 	}
 }
