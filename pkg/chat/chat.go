@@ -9,12 +9,12 @@ import (
 	"github.com/openai/openai-go"
 )
 
-func Run(ctx context.Context, client *openai.Client, model string) error {
+func Run(ctx context.Context, client openai.Client, model string) error {
 	//output := termenv.NewOutput(os.Stdout)
 
 	param := openai.ChatCompletionNewParams{
-		Model:    openai.F(model),
-		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{}),
+		Model:    model,
+		Messages: []openai.ChatCompletionMessageParamUnion{},
 	}
 
 	println()
@@ -45,7 +45,7 @@ func Run(ctx context.Context, client *openai.Client, model string) error {
 		println("> " + prompt)
 		println()
 
-		param.Messages.Value = append(param.Messages.Value, openai.UserMessage(prompt))
+		param.Messages = append(param.Messages, openai.UserMessage(prompt))
 
 		//output.HideCursor()
 		//output.SaveCursorPosition()
@@ -74,7 +74,7 @@ func Run(ctx context.Context, client *openai.Client, model string) error {
 		println()
 		println()
 
-		param.Messages.Value = append(param.Messages.Value, acc.Choices[0].Message)
+		param.Messages = append(param.Messages, acc.Choices[0].Message.ToParam())
 
 		// output.RestoreCursorPosition()
 		// output.ClearLine()

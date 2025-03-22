@@ -22,7 +22,7 @@ type Catalog struct {
 	doc *openapi3.T
 
 	api *client.Client
-	llm *openai.Client
+	llm openai.Client
 
 	operations map[string]Operation
 
@@ -33,7 +33,7 @@ type Client interface {
 	Execute(ctx context.Context, method, path string, body io.Reader) ([]byte, string)
 }
 
-func New(path string, api *client.Client, llm *openai.Client) (*Catalog, error) {
+func New(path string, api *client.Client, llm openai.Client) (*Catalog, error) {
 	doc, err := parse(path)
 
 	if err != nil {
@@ -96,24 +96,22 @@ func (c *Catalog) invokeLLM(ctx context.Context, model string, message openai.Ch
 
 	for _, o := range c.operations {
 		tools = append(tools, openai.ChatCompletionToolParam{
-			Type: openai.F(openai.ChatCompletionToolTypeFunction),
+			Function: shared.FunctionDefinitionParam{
+				Name:        o.Name,
+				Description: openai.String(o.Description),
 
-			Function: openai.F(shared.FunctionDefinitionParam{
-				Name:        openai.F(o.Name),
-				Description: openai.F(o.Description),
+				Strict: openai.Bool(true),
 
-				Strict: openai.F(true),
-
-				Parameters: openai.F(openai.FunctionParameters(o.Schema)),
-			}),
+				Parameters: openai.FunctionParameters(o.Schema),
+			},
 		})
 	}
 
 	completion, err := c.llm.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-		Model: openai.F(model),
+		Model: model,
 
-		Tools:    openai.F(tools),
-		Messages: openai.F(append(c.messages, message)),
+		Tools:    tools,
+		Messages: append(c.messages, message),
 	})
 
 	if err != nil {
@@ -121,8 +119,7 @@ func (c *Catalog) invokeLLM(ctx context.Context, model string, message openai.Ch
 	}
 
 	result := completion.Choices[0].Message
-
-	c.messages = append(c.messages, message, result)
+	c.messages = append(c.messages, message, result.ToParam())
 
 	return &result, nil
 }

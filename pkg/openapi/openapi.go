@@ -18,7 +18,7 @@ import (
 	"github.com/openai/openai-go"
 )
 
-func Run(ctx context.Context, c *openai.Client, model, path, url, bearer, username, password string) error {
+func Run(ctx context.Context, llm openai.Client, model, path, url, bearer, username, password string) error {
 	client, err := client.New(url,
 		client.WithBearer(bearer),
 		client.WithBasicAuth(username, password),
@@ -29,7 +29,7 @@ func Run(ctx context.Context, c *openai.Client, model, path, url, bearer, userna
 		return err
 	}
 
-	catalog, err := catalog.New(path, client, c)
+	catalog, err := catalog.New(path, client, llm)
 
 	if err != nil {
 		return err

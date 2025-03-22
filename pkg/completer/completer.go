@@ -7,7 +7,7 @@ import (
 	"github.com/openai/openai-go"
 )
 
-func Run(ctx context.Context, client *openai.Client, model, prompt string) error {
+func Run(ctx context.Context, client openai.Client, model, prompt string) error {
 	prompt = strings.TrimSpace(prompt)
 
 	if prompt == "" {
@@ -17,10 +17,11 @@ func Run(ctx context.Context, client *openai.Client, model, prompt string) error
 	//output := termenv.NewOutput(os.Stdout)
 
 	param := openai.ChatCompletionNewParams{
-		Model: openai.F(model),
-		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
+		Model: model,
+
+		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage(prompt),
-		}),
+		},
 	}
 
 	// output.HideCursor()

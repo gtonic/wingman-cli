@@ -26,7 +26,7 @@ var (
 	system string
 )
 
-func Run(ctx context.Context, client *openai.Client, model, path string) error {
+func Run(ctx context.Context, client openai.Client, model, path string) error {
 	path, err := filepath.Abs(path)
 
 	if err != nil {
@@ -59,13 +59,13 @@ func Run(ctx context.Context, client *openai.Client, model, path string) error {
 	output.WriteString("\n")
 
 	params := openai.ChatCompletionNewParams{
-		Model: openai.F(model),
+		Model: model,
 
-		Tools: openai.F(toTools(tools)),
+		Tools: toTools(tools),
 
-		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
+		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.SystemMessage(system),
-		}),
+		},
 	}
 
 	for {
@@ -91,7 +91,7 @@ func Run(ctx context.Context, client *openai.Client, model, path string) error {
 		output.WriteString("> " + prompt)
 		output.WriteString("\n")
 
-		params.Messages.Value = append(params.Messages.Value, openai.UserMessage(prompt))
+		params.Messages = append(params.Messages, openai.UserMessage(prompt))
 
 		completion, err := client.Chat.Completions.New(ctx, params)
 
@@ -100,12 +100,11 @@ func Run(ctx context.Context, client *openai.Client, model, path string) error {
 		}
 
 		message := completion.Choices[0].Message
-		params.Messages.Value = append(params.Messages.Value, message)
+		params.Messages = append(params.Messages, message.ToParam())
 
 		for len(message.ToolCalls) > 0 {
-			for _, call := range message.ToolCalls {
-				m := handleToolCall(ctx, tools, call)
-				params.Messages.Value = append(params.Messages.Value, m)
+			for _, c := range message.ToolCalls {
+				params.Messages = append(params.Messages, handleToolCall(ctx, tools, c))
 			}
 
 			completion, err = client.Chat.Completions.New(ctx, params)
@@ -115,7 +114,7 @@ func Run(ctx context.Context, client *openai.Client, model, path string) error {
 			}
 
 			message = completion.Choices[0].Message
-			params.Messages.Value = append(params.Messages.Value, message)
+			params.Messages = append(params.Messages, message.ToParam())
 		}
 
 		content := message.Content
@@ -123,7 +122,7 @@ func Run(ctx context.Context, client *openai.Client, model, path string) error {
 	}
 }
 
-func handleToolCall(ctx context.Context, tools []tool.Tool, call openai.ChatCompletionMessageToolCall) openai.ChatCompletionToolMessageParam {
+func handleToolCall(ctx context.Context, tools []tool.Tool, call openai.ChatCompletionMessageToolCall) openai.ChatCompletionMessageParamUnion {
 	println("⚡️ " + call.Function.Name)
 
 	var handler tool.ExecuteFn
@@ -137,7 +136,7 @@ func handleToolCall(ctx context.Context, tools []tool.Tool, call openai.ChatComp
 	}
 
 	if handler == nil {
-		return openai.ToolMessage(call.ID, "Unknown tool: "+call.Function.Name)
+		return openai.ToolMessage("Unknown tool: "+call.Function.Name, call.ID)
 	}
 
 	var args map[string]any
@@ -146,7 +145,7 @@ func handleToolCall(ctx context.Context, tools []tool.Tool, call openai.ChatComp
 	result, err := handler(ctx, args)
 
 	if err != nil {
-		return openai.ToolMessage(call.ID, err.Error())
+		return openai.ToolMessage(err.Error(), call.ID)
 	}
 
 	var content string
@@ -159,7 +158,7 @@ func handleToolCall(ctx context.Context, tools []tool.Tool, call openai.ChatComp
 		content = string(data)
 	}
 
-	return openai.ToolMessage(call.ID, content)
+	return openai.ToolMessage(content, call.ID)
 }
 
 func toTools(tools []tool.Tool) []openai.ChatCompletionToolParam {
@@ -174,13 +173,11 @@ func toTools(tools []tool.Tool) []openai.ChatCompletionToolParam {
 
 func toTool(t tool.Tool) openai.ChatCompletionToolParam {
 	return openai.ChatCompletionToolParam{
-		Type: openai.F(openai.ChatCompletionToolTypeFunction),
+		Function: shared.FunctionDefinitionParam{
+			Name:        t.Name,
+			Description: openai.String(t.Description),
 
-		Function: openai.F(shared.FunctionDefinitionParam{
-			Name:        openai.F(t.Name),
-			Description: openai.F(t.Description),
-
-			Parameters: openai.F(shared.FunctionParameters(t.Schema)),
-		}),
+			Parameters: shared.FunctionParameters(t.Schema),
+		},
 	}
 }
