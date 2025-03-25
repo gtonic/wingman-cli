@@ -1,4 +1,4 @@
-package coder
+package admin
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/adrianliechti/wingman/pkg/markdown"
 	"github.com/adrianliechti/wingman/pkg/tool"
+	"github.com/adrianliechti/wingman/pkg/tool/cli"
 	"github.com/adrianliechti/wingman/pkg/tool/fs"
 
 	"github.com/charmbracelet/huh"
@@ -40,20 +41,20 @@ func Run(ctx context.Context, client openai.Client, model, path string) error {
 
 	var tools []tool.Tool
 
+	for _, name := range []string{"kubectl", "helm", "docker"} {
+		if c, err := cli.New(name); err == nil {
+			t, _ := c.Tools(ctx)
+			tools = append(tools, t...)
+		}
+	}
+
 	if t, err := fs.Tools(ctx); err == nil {
 		tools = append(tools, t...)
 	}
 
-	// for _, name := range []string{"git", "wget", "curl", "docker", "kubectl", "helm", "jq", "yq"} {
-	// 	if c, err := cli.New(name); err == nil {
-	// 		t, _ := c.Tools(ctx)
-	// 		tools = append(tools, t...)
-	// 	}
-	// }
-
 	output := termenv.NewOutput(os.Stdout)
 
-	output.WriteString("🤗 I'm your coding assistant and can help you with your application.\n")
+	output.WriteString("🤗 I'm your system admin assistant and can help you with your platform.\n")
 	output.WriteString("🗂️  " + path + "\n")
 	output.WriteString("\n")
 
