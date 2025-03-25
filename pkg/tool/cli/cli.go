@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"os/exec"
 
-	"github.com/adrianliechti/wingman/pkg/tool"
+	"github.com/adrianliechti/wingman-cli/pkg/tool"
 )
 
 func New(name string) (*CLI, error) {

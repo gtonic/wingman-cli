@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/adrianliechti/wingman/pkg/tool"
+	"github.com/adrianliechti/wingman-cli/pkg/tool"
 )
 
 func New(root string) (*FS, error) {

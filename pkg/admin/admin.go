@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/adrianliechti/wingman/pkg/markdown"
-	"github.com/adrianliechti/wingman/pkg/tool"
-	"github.com/adrianliechti/wingman/pkg/tool/cli"
-	"github.com/adrianliechti/wingman/pkg/tool/fs"
+	"github.com/adrianliechti/wingman-cli/pkg/markdown"
+	"github.com/adrianliechti/wingman-cli/pkg/tool"
+	"github.com/adrianliechti/wingman-cli/pkg/tool/cli"
+	"github.com/adrianliechti/wingman-cli/pkg/tool/fs"
 
 	"github.com/charmbracelet/huh"
 	"github.com/muesli/termenv"

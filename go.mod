@@ -1,17 +1,17 @@
-module github.com/adrianliechti/wingman
+module github.com/adrianliechti/wingman-cli
 
 go 1.24
 
 require (
 	github.com/charmbracelet/glamour v0.9.1
 	github.com/charmbracelet/huh v0.6.0
-	github.com/charmbracelet/huh/spinner v0.0.0-20250320172351-ff9123a4929b
+	github.com/charmbracelet/huh/spinner v0.0.0-20250325133537-78b18e123708
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/invopop/yaml v0.3.1
 	github.com/muesli/termenv v0.16.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/openai/openai-go v0.1.0-beta.1.0.20250322210617-1fcd83753ea8
+	github.com/openai/openai-go v0.1.0-beta.2
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/urfave/cli/v3 v3.0.0-alpha9.7
 )

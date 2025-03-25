@@ -9,10 +9,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/adrianliechti/wingman/pkg/cli"
-	"github.com/adrianliechti/wingman/pkg/markdown"
-	"github.com/adrianliechti/wingman/pkg/openapi/catalog"
-	"github.com/adrianliechti/wingman/pkg/openapi/client"
+	"github.com/adrianliechti/wingman-cli/pkg/cli"
+	"github.com/adrianliechti/wingman-cli/pkg/markdown"
+	"github.com/adrianliechti/wingman-cli/pkg/openapi/catalog"
+	"github.com/adrianliechti/wingman-cli/pkg/openapi/client"
 
 	"github.com/charmbracelet/huh"
 	"github.com/openai/openai-go"

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/adrianliechti/wingman/pkg/openapi/client"
+	"github.com/adrianliechti/wingman-cli/pkg/openapi/client"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/shared"

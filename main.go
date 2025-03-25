@@ -8,11 +8,11 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/adrianliechti/wingman/pkg/chat"
-	"github.com/adrianliechti/wingman/pkg/cli"
-	"github.com/adrianliechti/wingman/pkg/coder"
-	"github.com/adrianliechti/wingman/pkg/completer"
-	"github.com/adrianliechti/wingman/pkg/openapi"
+	"github.com/adrianliechti/wingman-cli/pkg/chat"
+	"github.com/adrianliechti/wingman-cli/pkg/cli"
+	"github.com/adrianliechti/wingman-cli/pkg/coder"
+	"github.com/adrianliechti/wingman-cli/pkg/completer"
+	"github.com/adrianliechti/wingman-cli/pkg/openapi"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
