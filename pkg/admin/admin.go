@@ -13,6 +13,7 @@ import (
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/cli"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/fs"
+	"github.com/adrianliechti/wingman-cli/pkg/tool/util"
 
 	"github.com/charmbracelet/huh"
 	"github.com/muesli/termenv"
@@ -25,6 +26,29 @@ var (
 	//go:embed prompt.txt
 	system string
 )
+
+type completer struct {
+	client openai.Client
+	model  string
+}
+
+func (c *completer) Complete(ctx context.Context, input string) (string, error) {
+	params := openai.ChatCompletionNewParams{
+		Model: c.model,
+
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage(input),
+		},
+	}
+
+	completion, err := c.client.Chat.Completions.New(ctx, params)
+
+	if err != nil {
+		return "", err
+	}
+
+	return completion.Choices[0].Message.Content, nil
+}
 
 func Run(ctx context.Context, client openai.Client, model, path string) error {
 	path, err := filepath.Abs(path)
@@ -44,7 +68,9 @@ func Run(ctx context.Context, client openai.Client, model, path string) error {
 	for _, name := range []string{"kubectl", "helm", "docker"} {
 		if c, err := cli.New(name); err == nil {
 			t, _ := c.Tools(ctx)
-			tools = append(tools, t...)
+
+			w := util.OptimizeContext(&completer{client, model}, t)
+			tools = append(tools, w...)
 		}
 	}
 

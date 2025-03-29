@@ -8,6 +8,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/adrianliechti/wingman-cli/pkg/admin"
 	"github.com/adrianliechti/wingman-cli/pkg/chat"
 	"github.com/adrianliechti/wingman-cli/pkg/cli"
 	"github.com/adrianliechti/wingman-cli/pkg/coder"
@@ -103,6 +104,17 @@ func initApp() cli.Command {
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					return chat.Run(ctx, client, defaultModel)
+				},
+			},
+
+			{
+				Name:  "admin",
+				Usage: "AI Admin",
+
+				HideHelp: true,
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					return admin.Run(ctx, client, defaultModel, "")
 				},
 			},
 
