@@ -11,10 +11,10 @@ import (
 	"github.com/adrianliechti/wingman-cli/app/chat"
 	"github.com/adrianliechti/wingman-cli/app/coder"
 	"github.com/adrianliechti/wingman-cli/app/complete"
+	"github.com/adrianliechti/wingman-cli/app/openapi"
 
 	"github.com/adrianliechti/wingman-cli/pkg/admin"
 	"github.com/adrianliechti/wingman-cli/pkg/cli"
-	"github.com/adrianliechti/wingman-cli/pkg/openapi"
 
 	"github.com/adrianliechti/wingman/pkg/client"
 
@@ -179,7 +179,7 @@ func initApp() cli.Command {
 					username := cmd.String("username")
 					password := cmd.String("password")
 
-					return openapi.Run(ctx, client, defaultModel, path, url, bearer, username, password)
+					return openapi.Run(ctx, c, defaultModel, path, url, bearer, username, password)
 				},
 			},
 		},

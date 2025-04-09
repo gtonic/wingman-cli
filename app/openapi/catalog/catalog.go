@@ -10,38 +10,40 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/adrianliechti/wingman-cli/pkg/openapi/client"
-
-	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/shared"
-
 	"github.com/getkin/kin-openapi/openapi3"
+
+	wingman "github.com/adrianliechti/wingman/pkg/client"
+	"github.com/adrianliechti/wingman/pkg/provider"
+	"github.com/adrianliechti/wingman/pkg/to"
+
+	"github.com/adrianliechti/wingman-cli/app/openapi/client"
 )
 
 type Catalog struct {
 	doc *openapi3.T
 
 	api *client.Client
-	llm openai.Client
+	llm *wingman.Client
+
+	tools    []wingman.Tool
+	messages []wingman.Message
 
 	operations map[string]Operation
-
-	messages []openai.ChatCompletionMessageParamUnion
 }
 
 type Client interface {
 	Execute(ctx context.Context, method, path string, body io.Reader) ([]byte, string)
 }
 
-func New(path string, api *client.Client, llm openai.Client) (*Catalog, error) {
+func New(path string, api *client.Client, llm *wingman.Client) (*Catalog, error) {
 	doc, err := parse(path)
 
 	if err != nil {
 		return nil, err
 	}
 
-	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage("You are connected to an API Server defined by your Tools. You can interact with it by sending messages. Keep answers short and to the point."),
+	messages := []wingman.Message{
+		wingman.SystemMessage("You are connected to an API Server defined by your Tools. You can interact with it by sending messages. Keep answers short and to the point."),
 	}
 
 	operations, err := getOperations(doc)
@@ -50,78 +52,113 @@ func New(path string, api *client.Client, llm openai.Client) (*Catalog, error) {
 		return nil, err
 	}
 
+	var tools []wingman.Tool
+
+	for _, o := range operations {
+		tools = append(tools, wingman.Tool{
+			Name:        o.Name,
+			Description: o.Description,
+
+			Parameters: o.Schema,
+
+			Strict: to.Ptr(true),
+		})
+	}
+
 	return &Catalog{
 		doc: doc,
 
 		api: api,
 		llm: llm,
 
-		messages:   messages,
+		tools:    tools,
+		messages: messages,
+
 		operations: operations,
 	}, nil
 }
 
 func (c *Catalog) Query(ctx context.Context, model, prompt string) (string, error) {
-	result, err := c.invokeLLM(ctx, model, openai.UserMessage(prompt))
+	c.messages = append(c.messages, wingman.UserMessage(prompt))
+
+	completion, err := c.llm.Completions.New(ctx, wingman.CompletionRequest{
+		Model: model,
+
+		Messages: c.messages,
+
+		CompleteOptions: wingman.CompleteOptions{
+			Tools: c.tools,
+		},
+	})
 
 	if err != nil {
 		return "", err
 	}
 
+	message := completion.Message
+	c.messages = append(c.messages, *message)
+
 	for {
-		for _, tc := range result.ToolCalls {
-			data, err := c.handleToolCall(ctx, tc.Function.Name, tc.Function.Arguments)
+		var calls []provider.ToolCall
 
-			if err != nil {
-				return "", err
-			}
-
-			result, err = c.invokeLLM(ctx, model, openai.ToolMessage(tc.ID, data))
-
-			if err != nil {
-				return "", err
+		for _, c := range message.Content {
+			if c.ToolCall != nil {
+				calls = append(calls, *c.ToolCall)
 			}
 		}
 
-		if len(result.ToolCalls) == 0 {
+		if len(calls) > 0 {
+			for _, call := range calls {
+				data, err := c.handleToolCall(ctx, call.Name, call.Arguments)
+
+				if err != nil {
+					return "", err
+				}
+
+				c.messages = append(c.messages, wingman.Message{
+					Role: provider.MessageRoleUser,
+
+					Content: []provider.Content{
+						{
+							ToolResult: &provider.ToolResult{
+								ID:   call.ID,
+								Data: data,
+							},
+						},
+					},
+				})
+			}
+
+			completion, err = c.llm.Completions.New(ctx, wingman.CompletionRequest{
+				Model: model,
+
+				Messages: c.messages,
+
+				CompleteOptions: wingman.CompleteOptions{
+					Tools: c.tools,
+				},
+			})
+
+			if err != nil {
+				return "", err
+			}
+
+			message = completion.Message
+			c.messages = append(c.messages, *message)
+		}
+
+		for _, c := range message.Content {
+			if c.ToolCall != nil {
+				calls = append(calls, *c.ToolCall)
+			}
+		}
+
+		if len(calls) == 0 {
 			break
 		}
 	}
 
-	return result.Content, nil
-}
-
-func (c *Catalog) invokeLLM(ctx context.Context, model string, message openai.ChatCompletionMessageParamUnion) (*openai.ChatCompletionMessage, error) {
-	var tools []openai.ChatCompletionToolParam
-
-	for _, o := range c.operations {
-		tools = append(tools, openai.ChatCompletionToolParam{
-			Function: shared.FunctionDefinitionParam{
-				Name:        o.Name,
-				Description: openai.String(o.Description),
-
-				Strict: openai.Bool(true),
-
-				Parameters: openai.FunctionParameters(o.Schema),
-			},
-		})
-	}
-
-	completion, err := c.llm.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-		Model: model,
-
-		Tools:    tools,
-		Messages: append(c.messages, message),
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	result := completion.Choices[0].Message
-	c.messages = append(c.messages, message, result.ToParam())
-
-	return &result, nil
+	return message.Text(), nil
 }
 
 func (c *Catalog) handleToolCall(ctx context.Context, name string, arguments string) (string, error) {

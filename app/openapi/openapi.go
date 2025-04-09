@@ -9,16 +9,18 @@ import (
 	"os"
 	"strings"
 
+	"github.com/charmbracelet/huh"
+
+	wingman "github.com/adrianliechti/wingman/pkg/client"
+
+	"github.com/adrianliechti/wingman-cli/app/openapi/catalog"
+	"github.com/adrianliechti/wingman-cli/app/openapi/client"
+
 	"github.com/adrianliechti/wingman-cli/pkg/cli"
 	"github.com/adrianliechti/wingman-cli/pkg/markdown"
-	"github.com/adrianliechti/wingman-cli/pkg/openapi/catalog"
-	"github.com/adrianliechti/wingman-cli/pkg/openapi/client"
-
-	"github.com/charmbracelet/huh"
-	"github.com/openai/openai-go"
 )
 
-func Run(ctx context.Context, llm openai.Client, model, path, url, bearer, username, password string) error {
+func Run(ctx context.Context, llm *wingman.Client, model, path, url, bearer, username, password string) error {
 	client, err := client.New(url,
 		client.WithBearer(bearer),
 		client.WithBasicAuth(username, password),
