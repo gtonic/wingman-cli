@@ -8,12 +8,15 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/adrianliechti/wingman-cli/app/chat"
+	"github.com/adrianliechti/wingman-cli/app/coder"
+	"github.com/adrianliechti/wingman-cli/app/complete"
+	"github.com/adrianliechti/wingman-cli/app/openapi"
+
 	"github.com/adrianliechti/wingman-cli/pkg/admin"
-	"github.com/adrianliechti/wingman-cli/pkg/chat"
 	"github.com/adrianliechti/wingman-cli/pkg/cli"
-	"github.com/adrianliechti/wingman-cli/pkg/coder"
-	"github.com/adrianliechti/wingman-cli/pkg/completer"
-	"github.com/adrianliechti/wingman-cli/pkg/openapi"
+
+	"github.com/adrianliechti/wingman/pkg/client"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -55,6 +58,8 @@ func initApp() cli.Command {
 		defaultModel = openai.ChatModelGPT4o
 	}
 
+	c := client.New(strings.TrimSuffix(baseURL, "/v1/"))
+
 	client := openai.NewClient(
 		option.WithAPIKey(apiKey),
 		option.WithBaseURL(strings.TrimRight(baseURL, "/")+"/"),
@@ -84,11 +89,11 @@ func initApp() cli.Command {
 					prompt += input
 				}
 
-				return completer.Run(ctx, client, defaultModel, prompt)
+				return complete.Run(ctx, c, defaultModel, prompt)
 			}
 
 			if cmd.Args().Len() > 0 {
-				return completer.Run(ctx, client, defaultModel, prompt)
+				return complete.Run(ctx, c, defaultModel, prompt)
 			}
 
 			cli.ShowAppHelp(cmd)
@@ -103,7 +108,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return chat.Run(ctx, client, defaultModel)
+					return chat.Run(ctx, c, defaultModel)
 				},
 			},
 
@@ -125,7 +130,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return coder.Run(ctx, client, defaultModel, "")
+					return coder.Run(ctx, c, defaultModel, "")
 				},
 			},
 
@@ -174,7 +179,7 @@ func initApp() cli.Command {
 					username := cmd.String("username")
 					password := cmd.String("password")
 
-					return openapi.Run(ctx, client, defaultModel, path, url, bearer, username, password)
+					return openapi.Run(ctx, c, defaultModel, path, url, bearer, username, password)
 				},
 			},
 		},
