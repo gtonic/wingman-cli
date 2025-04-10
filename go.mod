@@ -3,16 +3,16 @@ module github.com/adrianliechti/wingman-cli
 go 1.24
 
 require (
-	github.com/adrianliechti/wingman v0.0.0-20250408212453-299f7dbdea61
+	github.com/adrianliechti/wingman v0.0.0-20250410190104-4a0985e68abe
 	github.com/charmbracelet/glamour v0.9.1
 	github.com/charmbracelet/huh v0.6.0
-	github.com/charmbracelet/huh/spinner v0.0.0-20250404222243-039c3ae6c42c
+	github.com/charmbracelet/huh/spinner v0.0.0-20250410174039-76d1f8226680
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/invopop/yaml v0.3.1
 	github.com/muesli/termenv v0.16.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/openai/openai-go v0.1.0-beta.7
+	github.com/openai/openai-go v0.1.0-beta.9
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/urfave/cli/v3 v3.1.1
 )
@@ -48,7 +48,7 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/catppuccin/go v0.2.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
-	github.com/charmbracelet/bubbles v0.20.1-0.20250320170029-54f28b650198 // indirect
+	github.com/charmbracelet/bubbles v0.21.0 // indirect
 	github.com/charmbracelet/bubbletea v1.3.4 // indirect
 	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect

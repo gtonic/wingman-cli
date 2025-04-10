@@ -18,7 +18,6 @@ import (
 	"github.com/adrianliechti/wingman-cli/pkg/tool/fs"
 
 	wingman "github.com/adrianliechti/wingman/pkg/client"
-	"github.com/adrianliechti/wingman/pkg/provider"
 )
 
 var (
@@ -105,7 +104,7 @@ func Run(ctx context.Context, client *wingman.Client, model, path string) error 
 
 		input.Messages = append(input.Messages, *message)
 
-		var calls []provider.ToolCall
+		var calls []wingman.ToolCall
 
 		for _, c := range message.Content {
 			if c.ToolCall != nil {
@@ -129,18 +128,7 @@ func Run(ctx context.Context, client *wingman.Client, model, path string) error 
 					content = string(data)
 				}
 
-				input.Messages = append(input.Messages, wingman.Message{
-					Role: provider.MessageRoleUser,
-
-					Content: []provider.Content{
-						{
-							ToolResult: &provider.ToolResult{
-								ID:   c.ID,
-								Data: content,
-							},
-						},
-					},
-				})
+				input.Messages = append(input.Messages, wingman.ToolMessage(c.ID, content))
 			}
 
 			completion, err = client.Completions.New(ctx, input)
@@ -176,7 +164,7 @@ func toTool(t tool.Tool) wingman.Tool {
 	}
 }
 
-func handleToolCall(ctx context.Context, tools []tool.Tool, call provider.ToolCall) any {
+func handleToolCall(ctx context.Context, tools []tool.Tool, call wingman.ToolCall) any {
 	println("⚡️ " + call.Name)
 
 	var handler tool.ExecuteFn

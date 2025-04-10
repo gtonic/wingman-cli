@@ -13,8 +13,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 
 	wingman "github.com/adrianliechti/wingman/pkg/client"
-	"github.com/adrianliechti/wingman/pkg/provider"
-	"github.com/adrianliechti/wingman/pkg/to"
 
 	"github.com/adrianliechti/wingman-cli/app/openapi/client"
 )
@@ -61,7 +59,7 @@ func New(path string, api *client.Client, llm *wingman.Client) (*Catalog, error)
 
 			Parameters: o.Schema,
 
-			Strict: to.Ptr(true),
+			Strict: wingman.Ptr(true),
 		})
 	}
 
@@ -99,7 +97,7 @@ func (c *Catalog) Query(ctx context.Context, model, prompt string) (string, erro
 	c.messages = append(c.messages, *message)
 
 	for {
-		var calls []provider.ToolCall
+		var calls []wingman.ToolCall
 
 		for _, c := range message.Content {
 			if c.ToolCall != nil {
@@ -115,18 +113,7 @@ func (c *Catalog) Query(ctx context.Context, model, prompt string) (string, erro
 					return "", err
 				}
 
-				c.messages = append(c.messages, wingman.Message{
-					Role: provider.MessageRoleUser,
-
-					Content: []provider.Content{
-						{
-							ToolResult: &provider.ToolResult{
-								ID:   call.ID,
-								Data: data,
-							},
-						},
-					},
-				})
+				c.messages = append(c.messages, wingman.ToolMessage(call.ID, data))
 			}
 
 			completion, err = c.llm.Completions.New(ctx, wingman.CompletionRequest{
