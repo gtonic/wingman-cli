@@ -10,6 +10,12 @@ import (
 )
 
 func New(root string) (*FS, error) {
+	root, err := filepath.Abs(root)
+
+	if err != nil {
+		return nil, err
+	}
+
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return nil, err
 	}

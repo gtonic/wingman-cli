@@ -1,12 +1,10 @@
-package client
+package mcp
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 
-	"github.com/adrianliechti/wingman-cli/pkg/mcp/config"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 
 	"github.com/mark3labs/mcp-go/client"
@@ -17,7 +15,7 @@ type Client struct {
 	clients map[string]client.MCPClient
 }
 
-func New(config *config.Config) (*Client, error) {
+func New(config *Config) (*Client, error) {
 	c := &Client{
 		clients: make(map[string]client.MCPClient),
 	}
@@ -62,17 +60,11 @@ func New(config *config.Config) (*Client, error) {
 	}
 
 	for _, c := range c.clients {
-		result, err := c.Initialize(ctx, initRequest)
+		_, err := c.Initialize(ctx, initRequest)
 
 		if err != nil {
 			return nil, err
 		}
-
-		fmt.Printf(
-			"Initialized with server: %s %s\n\n",
-			result.ServerInfo.Name,
-			result.ServerInfo.Version,
-		)
 	}
 
 	return c, nil

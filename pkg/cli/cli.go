@@ -1,14 +1,11 @@
 package cli
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/huh/spinner"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/olekukonko/tablewriter"
-	"github.com/pkg/browser"
 	"github.com/urfave/cli/v3"
 )
 
@@ -21,266 +18,79 @@ type StringFlag = cli.StringFlag
 type StringSliceFlag = cli.StringSliceFlag
 type BoolFlag = cli.BoolFlag
 
-func ShowAppHelp(cmd *Command) {
-	cli.ShowAppHelp(cmd)
+func ShowAppHelp(cmd *Command) error {
+	return cli.ShowAppHelp(cmd)
 }
 
-func Info(v ...interface{}) {
-	os.Stdout.WriteString(fmt.Sprintln(v...))
-}
-
-func Infof(format string, a ...interface{}) {
-	v := fmt.Sprintf(format, a...)
-	Info(v)
-}
-
-func Warn(v ...interface{}) {
-	color := lipgloss.AdaptiveColor{Light: "#FFFDF5", Dark: "#FFFDF5"}
-
-	var style = lipgloss.NewStyle().
-		Foreground(color)
-
-	s := style.Render(fmt.Sprintln(v...))
-	os.Stderr.WriteString(s + "\n")
-}
-
-func Warnf(format string, a ...interface{}) {
-	v := fmt.Sprintf(format, a...)
-	Warn(v)
-}
-
-func Error(v ...interface{}) {
-	color := lipgloss.AdaptiveColor{Light: "#FF4672", Dark: "#ED567A"}
-
-	var style = lipgloss.NewStyle().
-		Foreground(color)
-
-	s := style.Render(fmt.Sprintln(v...))
-	os.Stderr.WriteString(s + "\n")
-}
-
-func Errorf(format string, a ...interface{}) {
-	v := fmt.Sprintf(format, a...)
-	Error(v)
-}
-
-func Fatal(v ...interface{}) {
-	Error(v...)
-	os.Exit(1)
-}
-
-func Fatalf(format string, a ...interface{}) {
-	v := fmt.Sprintf(format, a...)
-	Fatal(v)
-}
-
-func OpenFile(path string) error {
-	err := browser.OpenFile(path)
-
-	if err != nil {
-		Error("Unable to start file. try manually")
-		Error(path)
-	}
-
-	return nil
-}
-
-func OpenURL(url string) error {
-	err := browser.OpenURL(url)
-
-	if err != nil {
-		Error("Unable to start your browser. try manually.")
-		Error(url)
-	}
-
-	return nil
-}
-
-func Select(label string, items []string) (int, string, error) {
-	s := huh.NewSelect[int]()
-
-	if label != "" {
-		s.Title(label)
-	}
-
-	options := make([]huh.Option[int], 0)
-
-	for i, item := range items {
-		options = append(options, huh.NewOption(item, i))
-	}
-
-	var index int
-
-	s.Value(&index)
-	s.Options(options...)
-
-	if err := s.Run(); err != nil {
-		return 0, "", err
-	}
-
-	result := items[index]
-
-	if result != "" {
-		fmt.Println("> " + result)
-	}
-
-	return index, result, nil
-}
-
-func MustSelect(label string, items []string) (int, string) {
-	index, value, err := Select(label, items)
-
-	if err != nil {
-		Fatal(err)
-	}
-
-	return index, value
+func ShowCommandHelp(cmd *Command) error {
+	return cli.ShowSubcommandHelp(cmd)
 }
 
 func Prompt(label, placeholder string) (string, error) {
-	i := huh.NewInput()
+	var s string
 
-	if label != "" {
-		i.Title(label)
+	r := bufio.NewReader(os.Stdin)
+
+	for {
+		fmt.Fprint(os.Stderr, label+" ")
+
+		s, _ = r.ReadString('\n')
+
+		if s != "" {
+			break
+		}
 	}
 
-	if placeholder != "" {
-		i.Placeholder(placeholder)
-	}
-
-	var result string
-	i.Value(&result)
-
-	if err := i.Run(); err != nil {
-		return "", err
-	}
-
-	if result == "" {
-		result = placeholder
-	}
-
-	if result != "" {
-		fmt.Println("> " + result)
-	}
-
-	return result, nil
+	return strings.TrimSpace(s), nil
 }
 
 func MustPrompt(label, placeholder string) string {
 	value, err := Prompt(label, placeholder)
 
 	if err != nil {
-		Fatal(err)
+		panic(err)
 	}
 
 	return value
 }
-
-func File(label string, types []string) (string, error) {
-	i := huh.NewFilePicker().
-		DirAllowed(false)
-
-	if label != "" {
-		i.Title(label)
-	}
-
-	if len(types) > 0 {
-		i.AllowedTypes(types)
-	}
-
-	var result string
-	i.Value(&result)
-
-	if err := i.Run(); err != nil {
-		return "", err
-	}
-
-	return result, nil
-}
-
-func MustFile(label string, types []string) string {
-	value, err := File(label, types)
-
-	if err != nil {
-		Fatal(err)
-	}
-
-	return value
-}
-
 func Confirm(label string, placeholder bool) (bool, error) {
-	c := huh.NewConfirm()
+	choices := "Y/n"
 
-	if label != "" {
-		c.Title(label)
+	if !placeholder {
+		choices = "y/N"
 	}
 
-	var result bool
-	c.Value(&result)
+	r := bufio.NewReader(os.Stdin)
 
-	return result, c.Run()
+	var s string
+
+	for {
+		fmt.Fprintf(os.Stderr, "%s (%s) ", label, choices)
+		s, _ = r.ReadString('\n')
+		s = strings.TrimSpace(s)
+
+		if s == "" {
+			return placeholder, nil
+		}
+
+		s = strings.ToLower(s)
+
+		if s == "y" || s == "yes" {
+			return true, nil
+		}
+
+		if s == "n" || s == "no" {
+			return false, nil
+		}
+	}
 }
 
 func MustConfirm(label string, placeholder bool) bool {
 	value, err := Confirm(label, placeholder)
 
 	if err != nil {
-		Fatal(err)
+		panic(err)
 	}
 
 	return value
-}
-
-func Title(val string) {
-	// Green
-	color := lipgloss.AdaptiveColor{Light: "#02BA84", Dark: "#02BF87"}
-
-	var style = lipgloss.NewStyle().
-		Foreground(color).
-		Bold(true).
-		Underline(true)
-
-	fmt.Println(style.Render(val))
-}
-
-func Table(header []string, rows [][]string) {
-	table := tablewriter.NewWriter(os.Stdout)
-
-	table.SetHeader(header)
-	table.AppendBulk(rows)
-
-	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(true)
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-	table.SetBorder(false)
-	table.SetTablePadding("\t") // pad with tabs
-	table.SetNoWhiteSpace(true)
-
-	table.Render()
-}
-
-func Run(title string, action func() error) error {
-	var err error
-
-	spinner.New().
-		Title(title).
-		Action(func() {
-			err = action()
-		}).
-		Run()
-
-	return err
-}
-
-func MustRun(title string, action func() error) {
-	err := Run(title, action)
-
-	if err != nil {
-		Fatal(err)
-	}
 }

@@ -4,34 +4,28 @@ import (
 	"context"
 	"io"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
+	"github.com/adrianliechti/wingman-cli/app/agent"
 	"github.com/adrianliechti/wingman-cli/app/chat"
-	"github.com/adrianliechti/wingman-cli/app/coder"
 	"github.com/adrianliechti/wingman-cli/app/complete"
-	"github.com/adrianliechti/wingman-cli/app/openapi"
-
-	"github.com/adrianliechti/wingman-cli/pkg/admin"
 	"github.com/adrianliechti/wingman-cli/pkg/cli"
 
 	"github.com/adrianliechti/wingman/pkg/client"
-
-	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/option"
 )
 
 var version string
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
-	defer stop()
+	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
+	// defer stop()
+
+	ctx := context.Background()
 
 	app := initApp()
 
 	if err := app.Run(ctx, os.Args); err != nil {
-		cli.Fatal(err)
+		panic(err)
 	}
 }
 
@@ -55,15 +49,10 @@ func initApp() cli.Command {
 	defaultModel := os.Getenv("OPENAI_MODEL")
 
 	if defaultModel == "" {
-		defaultModel = openai.ChatModelGPT4o
+		defaultModel = "gpt-4o"
 	}
 
-	c := client.New(strings.TrimSuffix(baseURL, "/v1/"))
-
-	client := openai.NewClient(
-		option.WithAPIKey(apiKey),
-		option.WithBaseURL(strings.TrimRight(baseURL, "/")+"/"),
-	)
+	client := client.New(strings.TrimSuffix(baseURL, "/v1/"))
 
 	return cli.Command{
 		Usage: "Wingman AI CLI",
@@ -89,15 +78,16 @@ func initApp() cli.Command {
 					prompt += input
 				}
 
-				return complete.Run(ctx, c, defaultModel, prompt)
+				println()
+				return complete.Run(ctx, client, defaultModel, prompt)
 			}
 
 			if cmd.Args().Len() > 0 {
-				return complete.Run(ctx, c, defaultModel, prompt)
+				println()
+				return complete.Run(ctx, client, defaultModel, prompt)
 			}
 
-			cli.ShowAppHelp(cmd)
-			return nil
+			return cli.ShowCommandHelp(cmd)
 		},
 
 		Commands: []*cli.Command{
@@ -108,7 +98,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return chat.Run(ctx, c, defaultModel)
+					return chat.Run(ctx, client, defaultModel)
 				},
 			},
 
@@ -119,7 +109,18 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return admin.Run(ctx, client, defaultModel, "")
+					return agent.RunAdmin(ctx, client, defaultModel)
+				},
+			},
+
+			{
+				Name:  "mcp",
+				Usage: "AI MCP Agent",
+
+				HideHelp: true,
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					return agent.RunMCP(ctx, client, defaultModel)
 				},
 			},
 
@@ -130,7 +131,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return coder.Run(ctx, c, defaultModel, "")
+					return agent.RunCoder(ctx, client, defaultModel)
 				},
 			},
 
@@ -179,7 +180,7 @@ func initApp() cli.Command {
 					username := cmd.String("username")
 					password := cmd.String("password")
 
-					return openapi.Run(ctx, c, defaultModel, path, url, bearer, username, password)
+					return agent.RunOpenAPI(ctx, client, defaultModel, path, url, bearer, username, password)
 				},
 			},
 		},

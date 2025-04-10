@@ -8,8 +8,6 @@ import (
 )
 
 func Run(ctx context.Context, client *wingman.Client, model, prompt string) error {
-	println()
-
 	prompt = strings.TrimSpace(prompt)
 
 	if prompt == "" {
