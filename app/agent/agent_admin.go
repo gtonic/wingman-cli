@@ -37,8 +37,8 @@ func RunAdmin(ctx context.Context, client *wingman.Client, model string) error {
 			println("🔨 " + name)
 
 			t, _ := c.Tools(ctx)
+			t = toolsWrapper(client, model, t)
 
-			//w := util.OptimizeContext(&completer{client, model}, t)
 			tools = append(tools, t...)
 		}
 	}
@@ -47,7 +47,5 @@ func RunAdmin(ctx context.Context, client *wingman.Client, model string) error {
 
 	return Run(ctx, client, model, tools, &RunOptions{
 		System: system_admin,
-
-		OptimizeTools: true,
 	})
 }

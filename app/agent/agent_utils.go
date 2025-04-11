@@ -66,9 +66,9 @@ func toolWrapper(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 				return nil, errors.New("goal is required")
 			}
 
-			println("#######")
-			println("🥅", goal)
-			println()
+			// println("#######")
+			// println("🥅", goal)
+			// println()
 
 			input, ok := args["input"].(map[string]any)
 
@@ -92,9 +92,9 @@ func toolWrapper(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 				data = string(json)
 			}
 
-			println("#######")
-			println(data)
-			println()
+			// println("#######")
+			// println(data)
+			// println()
 
 			completion, err := client.Completions.New(ctx, wingman.CompletionRequest{
 				Model: model,
@@ -109,13 +109,13 @@ func toolWrapper(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 				return nil, err
 			}
 
-			summary := completion.Message.Text()
+			content := completion.Message.Text()
 
-			println("#######")
-			println("summary", summary)
-			println()
+			// println("#######")
+			// println("summary", summary)
+			// println()
 
-			return summary, nil
+			return content, nil
 		},
 	}
 }

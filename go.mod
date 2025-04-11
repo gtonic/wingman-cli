@@ -8,7 +8,6 @@ require (
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/invopop/yaml v0.3.1
 	github.com/mark3labs/mcp-go v0.18.0
-	github.com/muesli/termenv v0.16.0
 	github.com/urfave/cli/v3 v3.1.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -74,6 +73,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
+	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/openai/openai-go v0.1.0-beta.9 // indirect
