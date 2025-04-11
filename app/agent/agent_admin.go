@@ -45,5 +45,9 @@ func RunAdmin(ctx context.Context, client *wingman.Client, model string) error {
 
 	println("")
 
-	return Run(ctx, client, model, system_admin, tools)
+	return Run(ctx, client, model, tools, &RunOptions{
+		System: system_admin,
+
+		OptimizeTools: true,
+	})
 }

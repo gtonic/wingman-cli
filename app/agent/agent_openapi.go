@@ -43,7 +43,11 @@ func RunOpenAPI(ctx context.Context, client *wingman.Client, model string, path,
 
 	tools := catalog.Tools()
 
-	return Run(ctx, client, model, system_openapi, tools)
+	return Run(ctx, client, model, tools, &RunOptions{
+		System: system_openapi,
+
+		OptimizeTools: true,
+	})
 }
 
 func handleConfirm(method, path, contentType string, body io.Reader) error {

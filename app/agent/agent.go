@@ -8,8 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/muesli/termenv"
-
 	"github.com/adrianliechti/wingman-cli/pkg/cli"
 	"github.com/adrianliechti/wingman-cli/pkg/markdown"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
@@ -17,8 +15,20 @@ import (
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
-func Run(ctx context.Context, client *wingman.Client, model, system string, tools []tool.Tool) error {
-	output := termenv.NewOutput(os.Stdout)
+type RunOptions struct {
+	System string
+
+	OptimizeTools bool
+}
+
+func Run(ctx context.Context, client *wingman.Client, model string, tools []tool.Tool, options *RunOptions) error {
+	if options == nil {
+		options = new(RunOptions)
+	}
+
+	if options.OptimizeTools {
+		tools = toolsWrapper(client, model, tools)
+	}
 
 	input := wingman.CompletionRequest{
 		Model: model,
@@ -28,11 +38,11 @@ func Run(ctx context.Context, client *wingman.Client, model, system string, tool
 		},
 	}
 
-	if system != "" {
-		input.Messages = append(input.Messages, wingman.SystemMessage(system))
+	if options.System != "" {
+		input.Messages = append(input.Messages, wingman.SystemMessage(options.System))
 	}
 
-	output.WriteString("\n")
+	println()
 
 	for {
 		prompt, _ := cli.Prompt("> ", "")
@@ -78,7 +88,7 @@ func Run(ctx context.Context, client *wingman.Client, model, system string, tool
 			return nil
 		}
 
-		markdown.Render(output, message.Text())
+		markdown.Render(os.Stdout, message.Text())
 	}
 }
 
@@ -117,23 +127,4 @@ func handleToolCall(ctx context.Context, tools []tool.Tool, call wingman.ToolCal
 	}
 
 	return content, nil
-}
-
-func toTools(tools []tool.Tool) []wingman.Tool {
-	var result []wingman.Tool
-
-	for _, t := range tools {
-		result = append(result, toTool(t))
-	}
-
-	return result
-}
-
-func toTool(t tool.Tool) wingman.Tool {
-	return wingman.Tool{
-		Name:        t.Name,
-		Description: t.Description,
-
-		Parameters: t.Schema,
-	}
 }

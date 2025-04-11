@@ -39,5 +39,7 @@ func RunCoder(ctx context.Context, client *wingman.Client, model string) error {
 		}
 	}
 
-	return Run(ctx, client, model, system_coder, tools)
+	return Run(ctx, client, model, tools, &RunOptions{
+		System: system_coder,
+	})
 }

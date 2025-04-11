@@ -34,5 +34,7 @@ func RunMCP(ctx context.Context, client *wingman.Client, model string) error {
 		return err
 	}
 
-	return Run(ctx, client, model, "", tools)
+	return Run(ctx, client, model, tools, &RunOptions{
+		OptimizeTools: true,
+	})
 }

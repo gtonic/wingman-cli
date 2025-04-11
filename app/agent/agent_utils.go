@@ -1,4 +1,4 @@
-package util
+package agent
 
 import (
 	"context"
@@ -6,23 +6,40 @@ import (
 	"errors"
 
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
+
+	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
-type Model interface {
-	Complete(ctx context.Context, input string) (string, error)
+func toTools(tools []tool.Tool) []wingman.Tool {
+	var result []wingman.Tool
+
+	for _, t := range tools {
+		result = append(result, toTool(t))
+	}
+
+	return result
 }
 
-func OptimizeContext(model Model, tools []tool.Tool) []tool.Tool {
+func toTool(t tool.Tool) wingman.Tool {
+	return wingman.Tool{
+		Name:        t.Name,
+		Description: t.Description,
+
+		Parameters: t.Schema,
+	}
+}
+
+func toolsWrapper(client *wingman.Client, model string, tools []tool.Tool) []tool.Tool {
 	var wrapped []tool.Tool
 
 	for _, t := range tools {
-		wrapped = append(wrapped, createWrapper(model, t))
+		wrapped = append(wrapped, toolWrapper(client, model, t))
 	}
 
 	return wrapped
 }
 
-func createWrapper(m Model, t tool.Tool) tool.Tool {
+func toolWrapper(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 	schema := tool.Schema{
 		"type": "object",
 
@@ -49,13 +66,15 @@ func createWrapper(m Model, t tool.Tool) tool.Tool {
 				return nil, errors.New("goal is required")
 			}
 
+			println("#######")
+			println("🥅", goal)
+			println()
+
 			input, ok := args["input"].(map[string]any)
 
 			if !ok {
 				return nil, errors.New("input is required")
 			}
-
-			println("🥅", "goal", goal)
 
 			result, err := t.Execute(ctx, input)
 
@@ -74,18 +93,27 @@ func createWrapper(m Model, t tool.Tool) tool.Tool {
 			}
 
 			println("#######")
-			println("data", data)
-			println("#######")
+			println(data)
+			println()
 
-			summary, err := m.Complete(ctx, "Extract the relevant information from the following data based on the goal:\n"+goal+"\n\nData: "+data)
+			completion, err := client.Completions.New(ctx, wingman.CompletionRequest{
+				Model: model,
+
+				Messages: []wingman.Message{
+					wingman.SystemMessage("Extract relevant information based on this goal:\n" + goal),
+					wingman.UserMessage(data),
+				},
+			})
 
 			if err != nil {
 				return nil, err
 			}
 
+			summary := completion.Message.Text()
+
 			println("#######")
 			println("summary", summary)
-			println("#######")
+			println()
 
 			return summary, nil
 		},
