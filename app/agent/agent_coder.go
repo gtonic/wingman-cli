@@ -18,7 +18,7 @@ var (
 
 func RunCoder(ctx context.Context, client *wingman.Client, model string) error {
 	println("🤗 Hello, I'm your AI Coder")
-	println("")
+	println()
 
 	fs, err := fs.New("")
 
@@ -42,6 +42,8 @@ func RunCoder(ctx context.Context, client *wingman.Client, model string) error {
 			tools = append(tools, t...)
 		}
 	}
+
+	println()
 
 	return Run(ctx, client, model, tools, &RunOptions{
 		System: system_coder,

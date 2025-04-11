@@ -23,7 +23,7 @@ var (
 
 func RunOpenAPI(ctx context.Context, client *wingman.Client, model string, path, url, bearer, username, password string) error {
 	println("🤗 Hello, I'm your OpenAPI AI Assistant")
-	println("")
+	println()
 
 	c, err := openapiclient.New(url,
 		openapiclient.WithBearer(bearer),
