@@ -103,17 +103,6 @@ func initApp() cli.Command {
 			},
 
 			{
-				Name:  "admin",
-				Usage: "AI Admin",
-
-				HideHelp: true,
-
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return agent.RunAdmin(ctx, client, defaultModel)
-				},
-			},
-
-			{
 				Name:  "mcp",
 				Usage: "AI MCP Agent",
 
