@@ -42,11 +42,10 @@ func RunOpenAPI(ctx context.Context, client *wingman.Client, model string, path,
 	}
 
 	tools := catalog.Tools()
+	tools = toolsWrapper(client, model, tools)
 
 	return Run(ctx, client, model, tools, &RunOptions{
 		System: system_openapi,
-
-		OptimizeTools: true,
 	})
 }
 

@@ -17,17 +17,11 @@ import (
 
 type RunOptions struct {
 	System string
-
-	OptimizeTools bool
 }
 
 func Run(ctx context.Context, client *wingman.Client, model string, tools []tool.Tool, options *RunOptions) error {
 	if options == nil {
 		options = new(RunOptions)
-	}
-
-	if options.OptimizeTools {
-		tools = toolsWrapper(client, model, tools)
 	}
 
 	input := wingman.CompletionRequest{

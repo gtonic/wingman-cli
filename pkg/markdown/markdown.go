@@ -8,7 +8,11 @@ import (
 )
 
 func Render(w io.Writer, content string) {
-	md, err := glamour.Render(content, "auto")
+	r, _ := glamour.NewTermRenderer(
+		glamour.WithAutoStyle(),
+	)
+
+	md, err := r.Render(content)
 
 	if err != nil {
 		fmt.Fprintln(w, content)

@@ -34,7 +34,11 @@ func RunCoder(ctx context.Context, client *wingman.Client, model string) error {
 
 	for _, name := range []string{"git", "wget", "curl", "docker", "kubectl", "helm", "jq", "yq"} {
 		if c, err := cli.New(name); err == nil {
+			println("🔨 " + name)
+
 			t, _ := c.Tools(ctx)
+			t = toolsWrapper(client, model, t)
+
 			tools = append(tools, t...)
 		}
 	}
