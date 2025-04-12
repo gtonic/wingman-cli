@@ -9,8 +9,8 @@ import (
 	"github.com/adrianliechti/wingman-cli/app/agent"
 	"github.com/adrianliechti/wingman-cli/app/chat"
 	"github.com/adrianliechti/wingman-cli/app/complete"
-	"github.com/adrianliechti/wingman-cli/pkg/cli"
 
+	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 

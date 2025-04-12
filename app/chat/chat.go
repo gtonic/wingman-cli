@@ -3,7 +3,7 @@ package chat
 import (
 	"context"
 
-	"github.com/adrianliechti/wingman-cli/pkg/cli"
+	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 

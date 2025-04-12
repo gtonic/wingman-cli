@@ -9,10 +9,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/adrianliechti/wingman-cli/pkg/cli"
 	"github.com/adrianliechti/wingman-cli/pkg/openapi"
 	openapiclient "github.com/adrianliechti/wingman-cli/pkg/openapi/client"
 
+	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
