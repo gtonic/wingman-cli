@@ -10,7 +10,13 @@ import (
 
 func RunMCP(ctx context.Context, client *wingman.Client, model string) error {
 	println("🤗 Hello, I'm your AI Assistant")
-	println("")
+	println()
+
+	system, err := parsePrompt()
+
+	if err != nil {
+		return err
+	}
 
 	cfg, err := mcp.Parse("mcp.json")
 
@@ -38,5 +44,7 @@ func RunMCP(ctx context.Context, client *wingman.Client, model string) error {
 
 	println()
 
-	return Run(ctx, client, model, tools, &RunOptions{})
+	return Run(ctx, client, model, tools, &RunOptions{
+		System: system,
+	})
 }

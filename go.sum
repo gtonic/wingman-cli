@@ -26,8 +26,8 @@ github.com/MakeNowJust/heredoc v1.0.0 h1:cXCdzVdstXyiTqTvfqk9SDHpKNjxuom+DOlyEeQ
 github.com/MakeNowJust/heredoc v1.0.0/go.mod h1:mG5amYoWBHf8vpLOuehzbGGw0EHxpZZ6lCpQ4fNJ8LE=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
-github.com/adrianliechti/go-cli v0.0.0-20250412100736-eb97709e823f h1:gJ7bzYlrwlogugP1UqnhV7FvJOWAQ70KucdAEDxD3ss=
-github.com/adrianliechti/go-cli v0.0.0-20250412100736-eb97709e823f/go.mod h1:NJT4RHRBoKFJWFp3mHGYt4/8pA+WloR2OMxcB4E8QD0=
+github.com/adrianliechti/go-cli v0.0.0-20250413072430-88d0e7229fd1 h1:qQcP1Nz8A77OxtOePEmHmwTAy9XRJKwsFmhdF9rXuws=
+github.com/adrianliechti/go-cli v0.0.0-20250413072430-88d0e7229fd1/go.mod h1:QEB8oKPEaFP5ylB0eeTcFOgE4Qf3t+7TzRk07EWP57c=
 github.com/adrianliechti/wingman v0.0.0-20250410191948-35d56215b1c5 h1:kza3c8xDYs0JVvWLWsWoCnGxM35RBxbn3KOYUckh0CE=
 github.com/adrianliechti/wingman v0.0.0-20250410191948-35d56215b1c5/go.mod h1:3q5dqHhEbprt9SGEXE2oukW6BmF92DPglNMApcHoujE=
 github.com/alecthomas/assert/v2 v2.7.0 h1:QtqSACNS3tF7oasA8CU6A6sXZSBDqnm7RfpLl9bZqbE=
