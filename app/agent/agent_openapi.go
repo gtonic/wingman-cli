@@ -9,10 +9,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/adrianliechti/wingman-cli/pkg/cli"
 	"github.com/adrianliechti/wingman-cli/pkg/openapi"
 	openapiclient "github.com/adrianliechti/wingman-cli/pkg/openapi/client"
 
+	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
@@ -23,7 +23,7 @@ var (
 
 func RunOpenAPI(ctx context.Context, client *wingman.Client, model string, path, url, bearer, username, password string) error {
 	println("🤗 Hello, I'm your OpenAPI AI Assistant")
-	println("")
+	println()
 
 	c, err := openapiclient.New(url,
 		openapiclient.WithBearer(bearer),

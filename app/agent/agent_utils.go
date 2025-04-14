@@ -4,11 +4,57 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"os"
 
+	"github.com/adrianliechti/wingman-cli/pkg/mcp"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
+
+func parsePrompt() (string, error) {
+	for _, name := range []string{".prompt.md", ".prompt.txt", "prompt.md", "prompt.txt"} {
+		if _, err := os.Stat(name); os.IsNotExist(err) {
+			continue
+		}
+
+		data, err := os.ReadFile(name)
+
+		if err != nil {
+			continue
+		}
+
+		return string(data), nil
+	}
+
+	return "", nil
+}
+
+func parseMCP() ([]tool.Tool, error) {
+	ctx := context.Background()
+
+	for _, name := range []string{".mcp.json", ".mcp.yaml", "mcp.json", "mcp.yaml"} {
+		if _, err := os.Stat(name); os.IsNotExist(err) {
+			continue
+		}
+
+		cfg, err := mcp.Parse(name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		mcp, err := mcp.New(cfg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return mcp.Tools(ctx)
+	}
+
+	return nil, nil
+}
 
 func toTools(tools []tool.Tool) []wingman.Tool {
 	var result []wingman.Tool

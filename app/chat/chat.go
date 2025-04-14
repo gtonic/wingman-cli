@@ -2,14 +2,14 @@ package chat
 
 import (
 	"context"
+	"errors"
+	"os"
 
-	"github.com/adrianliechti/wingman-cli/pkg/cli"
+	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
 func Run(ctx context.Context, client *wingman.Client, model string) error {
-	println()
-
 	input := wingman.CompletionRequest{
 		Model: model,
 
@@ -21,14 +21,20 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 		},
 	}
 
+	if system, err := parsePrompt(); err == nil {
+		input.Messages = append(input.Messages, wingman.SystemMessage(system))
+	}
+
 	for {
-		prompt, _ := cli.Prompt(">", "")
+		prompt, err := cli.Prompt("", "")
+
+		if err != nil {
+			break
+		}
 
 		if prompt == "" {
 			continue
 		}
-
-		println()
 
 		input.Messages = append(input.Messages, wingman.UserMessage(prompt))
 
@@ -44,4 +50,20 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 		println()
 		println()
 	}
+
+	return nil
+}
+
+func parsePrompt() (string, error) {
+	for _, name := range []string{".prompt.md", ".prompt.txt", "prompt.md", "prompt.txt"} {
+		data, err := os.ReadFile(name)
+
+		if err != nil {
+			continue
+		}
+
+		return string(data), nil
+	}
+
+	return "", errors.New("prompt file not found")
 }

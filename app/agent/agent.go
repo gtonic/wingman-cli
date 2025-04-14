@@ -8,10 +8,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/adrianliechti/wingman-cli/pkg/cli"
 	"github.com/adrianliechti/wingman-cli/pkg/markdown"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 
+	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
@@ -36,13 +36,11 @@ func Run(ctx context.Context, client *wingman.Client, model string, tools []tool
 		input.Messages = append(input.Messages, wingman.SystemMessage(options.System))
 	}
 
-	println()
-
 	for {
-		prompt, _ := cli.Prompt("> ", "")
+		prompt, err := cli.Prompt("", "")
 
-		if prompt == "" {
-			continue
+		if err != nil {
+			break
 		}
 
 		input.Messages = append(input.Messages, wingman.UserMessage(prompt))
@@ -50,9 +48,14 @@ func Run(ctx context.Context, client *wingman.Client, model string, tools []tool
 		var message *wingman.Message
 
 		for {
-			completion, err := client.Completions.New(ctx, input)
+			var completion *wingman.Completion
 
-			if err != nil {
+			fn := func() error {
+				completion, err = client.Completions.New(ctx, input)
+				return err
+			}
+
+			if err := cli.Run("Thinking...", fn); err != nil {
 				return err
 			}
 
@@ -66,7 +69,19 @@ func Run(ctx context.Context, client *wingman.Client, model string, tools []tool
 			}
 
 			for _, call := range calls {
-				println("⚡️ " + call.Name)
+				var content string
+
+				fn := func() error {
+					content, err = handleToolCall(ctx, tools, call)
+
+					if err != nil {
+						content = err.Error()
+					}
+
+					return nil
+				}
+
+				cli.Run("Invoking "+call.Name+"...", fn)
 
 				content, err := handleToolCall(ctx, tools, call)
 
@@ -84,6 +99,8 @@ func Run(ctx context.Context, client *wingman.Client, model string, tools []tool
 
 		markdown.Render(os.Stdout, message.Text())
 	}
+
+	return nil
 }
 
 func handleToolCall(ctx context.Context, tools []tool.Tool, call wingman.ToolCall) (string, error) {
