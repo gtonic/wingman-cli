@@ -2,28 +2,24 @@ package openapi
 
 import (
 	"context"
-	"io"
 	"strings"
 	"unicode"
 
 	"github.com/getkin/kin-openapi/openapi3"
 
+	"github.com/adrianliechti/wingman-cli/pkg/rest"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 )
-
-type Client interface {
-	Execute(ctx context.Context, method, path, contentType string, body io.Reader) ([]byte, error)
-}
 
 type Catalog struct {
 	doc *openapi3.T
 
-	client Client
+	client *rest.Client
 
 	operations map[string]Operation
 }
 
-func New(path string, client Client) (*Catalog, error) {
+func New(path string, client *rest.Client) (*Catalog, error) {
 	doc, err := parse(path)
 
 	if err != nil {
