@@ -3,12 +3,12 @@ module github.com/adrianliechti/wingman-cli
 go 1.24.2
 
 require (
-	github.com/adrianliechti/go-cli v0.0.2
+	github.com/adrianliechti/go-cli v0.0.3
 	github.com/adrianliechti/wingman v0.0.0-20250410191948-35d56215b1c5
 	github.com/charmbracelet/glamour v0.9.1
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/invopop/yaml v0.3.1
-	github.com/mark3labs/mcp-go v0.19.0
+	github.com/mark3labs/mcp-go v0.20.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
