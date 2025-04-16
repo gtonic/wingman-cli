@@ -26,8 +26,6 @@ github.com/MakeNowJust/heredoc v1.0.0 h1:cXCdzVdstXyiTqTvfqk9SDHpKNjxuom+DOlyEeQ
 github.com/MakeNowJust/heredoc v1.0.0/go.mod h1:mG5amYoWBHf8vpLOuehzbGGw0EHxpZZ6lCpQ4fNJ8LE=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
-github.com/adrianliechti/go-cli v0.0.2 h1:1hWxTeqJiQSLIfuggy6CNwTdBXMjDuNDcb88N/TBx2A=
-github.com/adrianliechti/go-cli v0.0.2/go.mod h1:ZrQzzQns7pVSQPpQxD6Xk0fbT8jLEpPmQunSzvL9hak=
 github.com/adrianliechti/go-cli v0.0.3 h1:VZ6vClrinooAVj87+34wC+cG92mqbx4t8o2QsHDCYC8=
 github.com/adrianliechti/go-cli v0.0.3/go.mod h1:ZrQzzQns7pVSQPpQxD6Xk0fbT8jLEpPmQunSzvL9hak=
 github.com/adrianliechti/wingman v0.0.0-20250410191948-35d56215b1c5 h1:kza3c8xDYs0JVvWLWsWoCnGxM35RBxbn3KOYUckh0CE=
@@ -199,8 +197,6 @@ github.com/magiconair/properties v1.8.9 h1:nWcCbLq1N2v/cpNsy5WvQ37Fb+YElfq20WJ/a
 github.com/magiconair/properties v1.8.9/go.mod h1:Dhd985XPs7jluiymwWYZ0G4Z61jb3vdS329zhj2hYo0=
 github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
-github.com/mark3labs/mcp-go v0.19.0 h1:cYKBPFD+fge273/TV6f5+TZYBSTnxV6GCJAO08D2wvA=
-github.com/mark3labs/mcp-go v0.19.0/go.mod h1:KmJndYv7GIgcPVwEKJjNcbhVQ+hJGJhrCCB/9xITzpE=
 github.com/mark3labs/mcp-go v0.20.1 h1:E1Bbx9K8d8kQmDZ1QHblM38c7UU2evQ2LlkANk1U/zw=
 github.com/mark3labs/mcp-go v0.20.1/go.mod h1:KmJndYv7GIgcPVwEKJjNcbhVQ+hJGJhrCCB/9xITzpE=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=

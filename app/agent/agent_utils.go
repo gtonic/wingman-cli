@@ -75,6 +75,14 @@ func toTool(t tool.Tool) wingman.Tool {
 	}
 }
 
+func OptimizeTools(client *wingman.Client, model string, tools []tool.Tool) []tool.Tool {
+	return toolsWrapper(client, model, tools)
+}
+
+func OptimizeTool(client *wingman.Client, model string, tool tool.Tool) tool.Tool {
+	return toolWrapper(client, model, tool)
+}
+
 func toolsWrapper(client *wingman.Client, model string, tools []tool.Tool) []tool.Tool {
 	var wrapped []tool.Tool
 
