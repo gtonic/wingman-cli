@@ -95,18 +95,6 @@ func initApp() cli.Command {
 			},
 
 			{
-				Name:  "mcp",
-				Usage: "AI MCP Agent",
-
-				HideHelp: true,
-
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					println()
-					return agent.RunMCP(ctx, client, model)
-				},
-			},
-
-			{
 				Name:  "coder",
 				Usage: "AI Coder",
 
@@ -119,8 +107,32 @@ func initApp() cli.Command {
 			},
 
 			{
+				Name:  "mcp",
+				Usage: "MCP Agent",
+
+				HideHelp: true,
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					println()
+					return agent.RunMCP(ctx, client, model)
+				},
+			},
+
+			{
+				Name:  "azure",
+				Usage: "Azure Agent",
+
+				HideHelp: true,
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					println()
+					return agent.RunAzure(ctx, client, model)
+				},
+			},
+
+			{
 				Name:  "openapi",
-				Usage: "AI OpenAPI Client",
+				Usage: "OpenAPI Agent",
 
 				HideHelp: true,
 

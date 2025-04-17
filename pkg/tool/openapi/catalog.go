@@ -11,14 +11,6 @@ import (
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 )
 
-type Catalog struct {
-	doc *openapi3.T
-
-	client *rest.Client
-
-	operations map[string]Operation
-}
-
 func New(path string, client *rest.Client) (*Catalog, error) {
 	doc, err := parse(path)
 
@@ -41,7 +33,19 @@ func New(path string, client *rest.Client) (*Catalog, error) {
 	}, nil
 }
 
-func (c *Catalog) Tools() []tool.Tool {
+var (
+	_ tool.Provider = (*Catalog)(nil)
+)
+
+type Catalog struct {
+	doc *openapi3.T
+
+	client *rest.Client
+
+	operations map[string]Operation
+}
+
+func (c *Catalog) Tools(ctx context.Context) ([]tool.Tool, error) {
 	var tools []tool.Tool
 
 	for _, o := range c.operations {
@@ -57,7 +61,7 @@ func (c *Catalog) Tools() []tool.Tool {
 		tools = append(tools, tool)
 	}
 
-	return tools
+	return tools, nil
 }
 
 func getOperations(doc *openapi3.T) (map[string]Operation, error) {
