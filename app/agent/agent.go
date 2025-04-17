@@ -71,19 +71,11 @@ func Run(ctx context.Context, client *wingman.Client, model string, tools []tool
 			}
 
 			for _, call := range calls {
-				var content string
+				content, err := handleToolCall(ctx, tools, call)
 
-				fn := func() error {
-					content, err = handleToolCall(ctx, tools, call)
-
-					if err != nil {
-						content = err.Error()
-					}
-
-					return nil
+				if err != nil {
+					content = err.Error()
 				}
-
-				cli.Run("Invoking "+call.Name+"...", fn)
 
 				input.Messages = append(input.Messages, wingman.ToolMessage(call.ID, content))
 			}

@@ -85,6 +85,10 @@ func (c *Client) Execute(ctx context.Context, method, path, contentType string, 
 		if err := c.confirm(method, path, contentType, body); err != nil {
 			return nil, err
 		}
+
+		if data != nil {
+			body = bytes.NewReader(data)
+		}
 	}
 
 	req, _ := http.NewRequestWithContext(ctx, method, url, body)

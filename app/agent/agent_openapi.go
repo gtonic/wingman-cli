@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 
@@ -55,8 +54,8 @@ func RunOpenAPI(ctx context.Context, client *wingman.Client, model string, path,
 }
 
 func handleConfirm(method, path, contentType string, body io.Reader) error {
-	fmt.Printf("⚡️ %s %s", method, path)
-	fmt.Println()
+	cli.Infof("⚡️ %s %s", method, path)
+	cli.Info()
 
 	if body != nil && contentType == "application/json" {
 		var val map[string]any
@@ -64,7 +63,7 @@ func handleConfirm(method, path, contentType string, body io.Reader) error {
 		json.NewDecoder(body).Decode(&val)
 		data, _ := json.MarshalIndent(val, "", "  ")
 
-		fmt.Println(string(data))
+		cli.Debug(string(data))
 	}
 
 	if strings.EqualFold(method, "HEAD") || strings.EqualFold(method, "GET") {
