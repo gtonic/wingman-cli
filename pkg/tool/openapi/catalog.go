@@ -53,6 +53,8 @@ func (c *Catalog) Tools(ctx context.Context) ([]tool.Tool, error) {
 			Name:        o.Name,
 			Description: o.Description,
 
+			Schema: o.Schema,
+
 			Execute: func(ctx context.Context, args map[string]any) (any, error) {
 				return o.Execute(ctx, c.client, args)
 			},
@@ -140,7 +142,11 @@ func getOperations(doc *openapi3.T) (map[string]Operation, error) {
 				if content != nil {
 					contentType = "application/json"
 
-					properties["body"] = content.Schema.Value.Properties
+					properties["body"] = map[string]any{
+						"type":       "object",
+						"properties": content.Schema.Value.Properties,
+					}
+
 					required = append(required, "body")
 				}
 			}
