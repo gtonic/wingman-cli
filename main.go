@@ -12,11 +12,14 @@ import (
 
 	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
+
+	"github.com/joho/godotenv"
 )
 
 var version string
 
 func main() {
+	godotenv.Load()
 	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
 	// defer stop()
 
