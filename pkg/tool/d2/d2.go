@@ -4,12 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"os/exec"
+	"strings"
 
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 
+	"oss.terrastruct.com/d2/d2compiler"
+	"oss.terrastruct.com/d2/d2exporter"
 	"oss.terrastruct.com/d2/d2layouts/d2dagrelayout"
-	"oss.terrastruct.com/d2/d2lib"
 	"oss.terrastruct.com/d2/d2renderers/d2svg"
+	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
+	"oss.terrastruct.com/d2/lib/textmeasure"
 )
 
 func New(name string) (*Command, error) {
@@ -75,7 +79,11 @@ func (c *Command) Tools(ctx context.Context) ([]tool.Tool, error) {
 
 				source := parameters.Args[0]
 
+				println("parsed source: " + source)
+
 				output, err := RunOracle(ctx, source)
+
+				println("resulting svg: " + output)
 
 				if err != nil {
 					return nil, err
@@ -88,23 +96,15 @@ func (c *Command) Tools(ctx context.Context) ([]tool.Tool, error) {
 }
 
 func RunOracle(ctx context.Context, source string) (string, error) {
-	// Compile the source into a diagram
-	diagram, graph, err := d2lib.Compile(ctx, source, nil, nil)
-	if err != nil {
-		return "", err
-	}
-
-	// Layout the graph using dagre layout with default options
-	err = d2dagrelayout.Layout(ctx, graph, nil)
-	if err != nil {
-		return "", err
-	}
-
-	// Render the diagram to SVG with default options
-	svgBytes, err := d2svg.Render(diagram, nil)
-	if err != nil {
-		return "", err
-	}
-
-	return string(svgBytes), nil
+	graph, config, _ := d2compiler.Compile("", strings.NewReader(source), nil)
+	graph.ApplyTheme(d2themescatalog.NeutralDefault.ID)
+	ruler, _ := textmeasure.NewRuler()
+	_ = graph.SetDimensions(nil, ruler, nil)
+	_ = d2dagrelayout.Layout(context.Background(), graph, nil)
+	diagram, _ := d2exporter.Export(context.Background(), graph, nil)
+	diagram.Config = config
+	out, _ := d2svg.Render(diagram, &d2svg.RenderOpts{
+		ThemeID: &d2themescatalog.NeutralDefault.ID,
+	})
+	return string(out), nil
 }
