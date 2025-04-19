@@ -148,7 +148,7 @@ func initApp() cli.Command {
 
 			{
 				Name:  "d2",
-				Usage: "d2 Agent",
+				Usage: "d2 Diagramming Agent",
 
 				HideHelp: true,
 

@@ -81,7 +81,7 @@ func (c *Command) Tools(ctx context.Context) ([]tool.Tool, error) {
 
 				println("parsed source: " + source)
 
-				output, err := RunOracle(ctx, source)
+				output, err := RenderSVG(ctx, source)
 
 				println("resulting svg: " + output)
 
@@ -95,7 +95,7 @@ func (c *Command) Tools(ctx context.Context) ([]tool.Tool, error) {
 	}, nil
 }
 
-func RunOracle(ctx context.Context, source string) (string, error) {
+func RenderSVG(ctx context.Context, source string) (string, error) {
 	graph, config, _ := d2compiler.Compile("", strings.NewReader(source), nil)
 	graph.ApplyTheme(d2themescatalog.NeutralDefault.ID)
 	ruler, _ := textmeasure.NewRuler()
