@@ -6,6 +6,10 @@ import (
 	"os/exec"
 
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
+
+	"oss.terrastruct.com/d2/d2layouts/d2dagrelayout"
+	"oss.terrastruct.com/d2/d2lib"
+	"oss.terrastruct.com/d2/d2renderers/d2svg"
 )
 
 func New(name string) (*Command, error) {
@@ -65,14 +69,42 @@ func (c *Command) Tools(ctx context.Context) ([]tool.Tool, error) {
 					return nil, err
 				}
 
-				output, err := exec.CommandContext(ctx, c.name, parameters.Args...).CombinedOutput()
+				if len(parameters.Args) == 0 {
+					return nil, nil
+				}
+
+				source := parameters.Args[0]
+
+				output, err := RunOracle(ctx, source)
 
 				if err != nil {
 					return nil, err
 				}
 
-				return string(output), nil
+				return output, nil
 			},
 		},
 	}, nil
+}
+
+func RunOracle(ctx context.Context, source string) (string, error) {
+	// Compile the source into a diagram
+	diagram, graph, err := d2lib.Compile(ctx, source, nil, nil)
+	if err != nil {
+		return "", err
+	}
+
+	// Layout the graph using dagre layout with default options
+	err = d2dagrelayout.Layout(ctx, graph, nil)
+	if err != nil {
+		return "", err
+	}
+
+	// Render the diagram to SVG with default options
+	svgBytes, err := d2svg.Render(diagram, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return string(svgBytes), nil
 }
