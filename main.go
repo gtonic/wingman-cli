@@ -147,6 +147,18 @@ func initApp() cli.Command {
 			},
 
 			{
+				Name:  "d2",
+				Usage: "d2 Agent",
+
+				HideHelp: true,
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					cli.Info()
+					return agent.RunD2(ctx, client, model)
+				},
+			},
+
+			{
 				Name:  "openapi",
 				Usage: "OpenAPI Agent",
 
