@@ -5,8 +5,8 @@ import (
 	_ "embed"
 
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
+	"github.com/adrianliechti/wingman-cli/pkg/tool/d2"
 	"github.com/adrianliechti/wingman-cli/pkg/util"
-	"github.com/gtonic/wingman-cli/pkg/tool/d2"
 
 	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
@@ -23,8 +23,11 @@ func RunD2(ctx context.Context, client *wingman.Client, model string) error {
 
 	var tools []tool.Tool
 
-	if t, err := d2.Tools(ctx); err == nil {
-		tools = append(tools, t...)
+	cmd, err := d2.New("d2")
+	if err == nil {
+		if t, err := cmd.Tools(ctx); err == nil {
+			tools = append(tools, t...)
+		}
 	}
 
 	tools = util.OptimizeTools(client, model, tools)
