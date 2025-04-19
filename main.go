@@ -9,6 +9,7 @@ import (
 	"github.com/adrianliechti/wingman-cli/app/agent"
 	"github.com/adrianliechti/wingman-cli/app/chat"
 	"github.com/adrianliechti/wingman-cli/app/complete"
+	"github.com/adrianliechti/wingman-cli/app/rag"
 
 	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
@@ -72,12 +73,12 @@ func initApp() cli.Command {
 					prompt += input
 				}
 
-				println()
+				cli.Info()
 				return complete.Run(ctx, client, model, prompt)
 			}
 
 			if cmd.Args().Len() > 0 {
-				println()
+				cli.Info()
 				return complete.Run(ctx, client, model, prompt)
 			}
 
@@ -92,7 +93,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					println()
+					cli.Info()
 					return chat.Run(ctx, client, model)
 				},
 			},
@@ -104,8 +105,20 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					println()
+					cli.Info()
 					return agent.RunCoder(ctx, client, model)
+				},
+			},
+
+			{
+				Name:  "rag",
+				Usage: "RAG Chat",
+
+				HideHelp: true,
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					cli.Info()
+					return rag.Run(ctx, client, model)
 				},
 			},
 
@@ -116,7 +129,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					println()
+					cli.Info()
 					return agent.RunMCP(ctx, client, model)
 				},
 			},
@@ -128,7 +141,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					println()
+					cli.Info()
 					return agent.RunAzure(ctx, client, model)
 				},
 			},
@@ -178,7 +191,7 @@ func initApp() cli.Command {
 					username := cmd.String("username")
 					password := cmd.String("password")
 
-					println()
+					cli.Info()
 					return agent.RunOpenAPI(ctx, client, model, path, url, bearer, username, password)
 				},
 			},

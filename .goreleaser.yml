@@ -6,8 +6,6 @@ before:
 
 builds:
   - binary: wingman
-    env:
-      - CGO_ENABLED=0
     goos:
       - linux
       - windows

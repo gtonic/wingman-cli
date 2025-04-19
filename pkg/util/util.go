@@ -1,10 +1,11 @@
-package agent
+package util
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/adrianliechti/wingman-cli/pkg/mcp"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
@@ -13,22 +14,6 @@ import (
 )
 
 func ParsePrompt() (string, error) {
-	return parsePrompt()
-}
-
-func ParseMCP() ([]tool.Tool, error) {
-	return parseMCP()
-}
-
-func OptimizeTools(client *wingman.Client, model string, tools []tool.Tool) []tool.Tool {
-	return toolsWrapper(client, model, tools)
-}
-
-func OptimizeTool(client *wingman.Client, model string, tool tool.Tool) tool.Tool {
-	return toolWrapper(client, model, tool)
-}
-
-func parsePrompt() (string, error) {
 	for _, name := range []string{".prompt.md", ".prompt.txt", "prompt.md", "prompt.txt"} {
 		if _, err := os.Stat(name); os.IsNotExist(err) {
 			continue
@@ -40,13 +25,14 @@ func parsePrompt() (string, error) {
 			continue
 		}
 
-		return string(data), nil
+		prompt := strings.TrimSpace(string(data))
+		return prompt, nil
 	}
 
 	return "", nil
 }
 
-func parseMCP() ([]tool.Tool, error) {
+func ParseMCP() ([]tool.Tool, error) {
 	ctx := context.Background()
 
 	for _, name := range []string{".mcp.json", ".mcp.yaml", "mcp.json", "mcp.yaml"} {
@@ -72,36 +58,17 @@ func parseMCP() ([]tool.Tool, error) {
 	return nil, nil
 }
 
-func toTools(tools []tool.Tool) []wingman.Tool {
-	var result []wingman.Tool
-
-	for _, t := range tools {
-		result = append(result, toTool(t))
-	}
-
-	return result
-}
-
-func toTool(t tool.Tool) wingman.Tool {
-	return wingman.Tool{
-		Name:        t.Name,
-		Description: t.Description,
-
-		Parameters: t.Schema,
-	}
-}
-
-func toolsWrapper(client *wingman.Client, model string, tools []tool.Tool) []tool.Tool {
+func OptimizeTools(client *wingman.Client, model string, tools []tool.Tool) []tool.Tool {
 	var wrapped []tool.Tool
 
 	for _, t := range tools {
-		wrapped = append(wrapped, toolWrapper(client, model, t))
+		wrapped = append(wrapped, OptimizeTool(client, model, t))
 	}
 
 	return wrapped
 }
 
-func toolWrapper(client *wingman.Client, model string, t tool.Tool) tool.Tool {
+func OptimizeTool(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 	schema := tool.Schema{
 		"type": "object",
 
@@ -154,9 +121,15 @@ func toolWrapper(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 				data = string(json)
 			}
 
+			data = strings.TrimSpace(data)
+
 			// println("#######")
 			// println(data)
 			// println()
+
+			if len(data) <= 4000 {
+				return data, nil
+			}
 
 			completion, err := client.Completions.New(ctx, wingman.CompletionRequest{
 				Model: model,
@@ -179,5 +152,24 @@ func toolWrapper(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 
 			return content, nil
 		},
+	}
+}
+
+func ConvertTools(tools []tool.Tool) []wingman.Tool {
+	var result []wingman.Tool
+
+	for _, t := range tools {
+		result = append(result, ConvertTool(t))
+	}
+
+	return result
+}
+
+func ConvertTool(t tool.Tool) wingman.Tool {
+	return wingman.Tool{
+		Name:        t.Name,
+		Description: t.Description,
+
+		Parameters: t.Schema,
 	}
 }
