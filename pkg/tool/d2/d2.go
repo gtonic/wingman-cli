@@ -7,7 +7,7 @@ import (
 
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 
-	"oss.terrastruct.com/d2/d2layouts/d2elklayout"
+	"oss.terrastruct.com/d2/d2layouts/d2dagrelayout"
 	"oss.terrastruct.com/d2/d2lib"
 	"oss.terrastruct.com/d2/d2renderers/d2svg"
 )
@@ -94,8 +94,8 @@ func RunOracle(ctx context.Context, source string) (string, error) {
 		return "", err
 	}
 
-	// Layout the graph using elk layout with default options
-	err = d2elklayout.Layout(ctx, graph, nil)
+	// Layout the graph using dagre layout with default options
+	err = d2dagrelayout.Layout(ctx, graph, nil)
 	if err != nil {
 		return "", err
 	}
