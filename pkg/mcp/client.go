@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 
@@ -12,13 +13,15 @@ import (
 )
 
 type Client struct {
-	clients map[string]client.MCPClient
+	clients map[string]*client.Client
 }
 
 func New(config *Config) (*Client, error) {
 	c := &Client{
-		clients: make(map[string]client.MCPClient),
+		clients: make(map[string]*client.Client),
 	}
+
+	ctx := context.Background()
 
 	for n, s := range config.Servers {
 		switch s.Type {
@@ -50,19 +53,21 @@ func New(config *Config) (*Client, error) {
 		}
 	}
 
-	ctx := context.Background()
-
-	initRequest := mcp.InitializeRequest{}
-	initRequest.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
-	initRequest.Params.ClientInfo = mcp.Implementation{
-		Name:    "wingman",
-		Version: "1.0.0",
+	for _, c := range c.clients {
+		if err := c.Start(ctx); err != nil {
+			return nil, err
+		}
 	}
 
 	for _, c := range c.clients {
-		_, err := c.Initialize(ctx, initRequest)
+		req := mcp.InitializeRequest{}
+		req.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
+		req.Params.ClientInfo = mcp.Implementation{
+			Name:    "wingman",
+			Version: "1.0.0",
+		}
 
-		if err != nil {
+		if _, err := c.Initialize(ctx, req); err != nil {
 			return nil, err
 		}
 	}
@@ -95,6 +100,14 @@ func (c *Client) Tools(ctx context.Context) ([]tool.Tool, error) {
 				return nil, err
 			}
 
+			if len(t.InputSchema.Properties) == 0 {
+				schema = map[string]any{
+					"type":                 "object",
+					"properties":           map[string]any{},
+					"additionalProperties": false,
+				}
+			}
+
 			tool := tool.Tool{
 				Name:        t.Name,
 				Description: t.Description,
@@ -102,12 +115,11 @@ func (c *Client) Tools(ctx context.Context) ([]tool.Tool, error) {
 				Schema: schema,
 
 				Execute: func(ctx context.Context, args map[string]any) (any, error) {
-					req := mcp.CallToolRequest{
-						Request: mcp.Request{
-							Method: "tools/call",
-						},
+					if args == nil {
+						args = map[string]any{}
 					}
 
+					req := mcp.CallToolRequest{}
 					req.Params.Name = t.Name
 					req.Params.Arguments = args
 
@@ -117,10 +129,6 @@ func (c *Client) Tools(ctx context.Context) ([]tool.Tool, error) {
 						return nil, err
 					}
 
-					if len(result.Content) == 0 {
-						return nil, errors.New("no content returned")
-					}
-
 					if len(result.Content) > 1 {
 						return nil, errors.New("multiple content types not supported")
 					}
@@ -128,15 +136,18 @@ func (c *Client) Tools(ctx context.Context) ([]tool.Tool, error) {
 					for _, content := range result.Content {
 						switch content := content.(type) {
 						case mcp.TextContent:
-							return content.Text, nil
+							text := strings.TrimSpace(content.Text)
+							return text, nil
+
 						case mcp.ImageContent:
 							return nil, errors.New("image content not supported")
+
 						case mcp.EmbeddedResource:
 							return nil, errors.New("embedded resource not supported")
 						}
 					}
 
-					return nil, nil
+					return nil, errors.New("no content returned")
 				},
 			}
 

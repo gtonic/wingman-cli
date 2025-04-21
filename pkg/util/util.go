@@ -116,7 +116,7 @@ func OptimizeTool(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 			input, ok := args["input"].(map[string]any)
 
 			if !ok {
-				return nil, errors.New("input is required")
+				input = map[string]any{}
 			}
 
 			result, err := t.Execute(ctx, input)
@@ -130,7 +130,7 @@ func OptimizeTool(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 			switch val := result.(type) {
 			case string:
 				data = val
-			case []any, map[string]any:
+			case any, []any, map[string]any:
 				json, _ := json.Marshal(val)
 				data = string(json)
 			}

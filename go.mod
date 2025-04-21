@@ -12,7 +12,7 @@ require (
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/invopop/yaml v0.3.1
 	github.com/joho/godotenv v1.5.1
-	github.com/mark3labs/mcp-go v0.21.1
+	github.com/mark3labs/mcp-go v0.22.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/datatypes v1.2.5
 	gorm.io/driver/sqlite v1.5.7
@@ -110,6 +110,7 @@ require (
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/replicate/replicate-go v0.26.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
