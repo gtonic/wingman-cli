@@ -8,9 +8,11 @@ import (
 	"strconv"
 
 	"gorm.io/datatypes"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	_ "github.com/ncruces/go-sqlite3/embed"
+	"github.com/ncruces/go-sqlite3/gormlite"
 
 	"github.com/adrianliechti/go-hnsw"
 )
@@ -50,7 +52,7 @@ type RecordModel struct {
 }
 
 func New(path string) (*Index, error) {
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+	db, err := gorm.Open(gormlite.Open(path), &gorm.Config{})
 
 	if err != nil {
 		return nil, err
