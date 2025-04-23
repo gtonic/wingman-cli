@@ -12,7 +12,7 @@ require (
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/invopop/yaml v0.3.1
 	github.com/joho/godotenv v1.5.1
-	github.com/mark3labs/mcp-go v0.23.0
+	github.com/mark3labs/mcp-go v0.23.1
 	github.com/ncruces/go-sqlite3 v0.25.0
 	github.com/ncruces/go-sqlite3/gormlite v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
