@@ -1,10 +1,13 @@
 package index
 
 import (
+	"cmp"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math"
+	"slices"
 	"strconv"
 
 	"gorm.io/datatypes"
@@ -13,13 +16,12 @@ import (
 
 	_ "github.com/ncruces/go-sqlite3/embed"
 	"github.com/ncruces/go-sqlite3/gormlite"
-
-	"github.com/adrianliechti/go-hnsw"
 )
 
 type Index struct {
-	db    *gorm.DB
-	graph *hnsw.Graph[uint]
+	db *gorm.DB
+
+	vectors map[uint][]float32
 }
 
 type Record struct {
@@ -58,15 +60,14 @@ func New(path string) (*Index, error) {
 		return nil, err
 	}
 
-	graph := hnsw.NewGraph[uint]()
-
 	if err := db.AutoMigrate(&RecordModel{}); err != nil {
 		return nil, err
 	}
 
 	i := &Index{
-		db:    db,
-		graph: graph,
+		db: db,
+
+		vectors: make(map[uint][]float32),
 	}
 
 	if err := i.indexEmbeddings(); err != nil {
@@ -85,7 +86,7 @@ func (i *Index) indexEmbeddings() error {
 				continue
 			}
 
-			i.graph.Add(hnsw.MakeNode(m.ID, m.Vector))
+			i.vectors[m.ID] = m.Vector
 		}
 
 		return nil
@@ -196,7 +197,7 @@ func (i *Index) Index(ctx context.Context, record ...Record) error {
 		}
 
 		if len(r.Vector) > 0 {
-			i.graph.Add(hnsw.MakeNode(m.ID, r.Vector))
+			i.vectors[m.ID] = r.Vector
 		}
 	}
 
@@ -204,12 +205,34 @@ func (i *Index) Index(ctx context.Context, record ...Record) error {
 }
 
 func (i *Index) Search(ctx context.Context, vector []float32, topK int) ([]Record, error) {
+	type scoredID struct {
+		ID    uint
+		score float64
+	}
+
+	scores := make([]scoredID, 0, len(i.vectors))
+
+	for k, v := range i.vectors {
+		score := similarity(vector, v)
+
+		scores = append(scores, scoredID{
+			ID:    k,
+			score: score,
+		})
+	}
+
+	slices.SortFunc(scores, func(a, b scoredID) int {
+		return cmp.Compare(b.score, a.score)
+	})
+
 	var ids []uint
 
-	nodes := i.graph.Search(vector, topK)
+	for _, n := range scores {
+		if len(ids) >= topK {
+			break
+		}
 
-	for _, n := range nodes {
-		ids = append(ids, n.Key)
+		ids = append(ids, n.ID)
 	}
 
 	var models []RecordModel
@@ -253,4 +276,48 @@ func (i *Index) Delete(ctx context.Context, ids ...string) error {
 
 	result := i.db.Unscoped().Delete(&RecordModel{}, identifiers)
 	return result.Error
+}
+
+func similarity(vals1, vals2 []float32) float64 {
+	l2norm := func(v float64, s, t float64) (float64, float64) {
+		if v == 0 {
+			return s, t
+		}
+
+		a := math.Abs(v)
+
+		if a > t {
+			r := t / v
+			s = 1 + s*r*r
+			t = a
+		} else {
+			r := v / t
+			s = s + r*r
+		}
+
+		return s, t
+	}
+
+	dot := float64(0)
+
+	s1 := float64(1)
+	t1 := float64(0)
+
+	s2 := float64(1)
+	t2 := float64(0)
+
+	for i, v1f := range vals1 {
+		v1 := float64(v1f)
+		v2 := float64(vals2[i])
+
+		dot += v1 * v2
+
+		s1, t1 = l2norm(v1, s1, t1)
+		s2, t2 = l2norm(v2, s2, t2)
+	}
+
+	l1 := t1 * math.Sqrt(s1)
+	l2 := t2 * math.Sqrt(s2)
+
+	return dot / (l1 * l2)
 }

@@ -99,18 +99,6 @@ func initApp() cli.Command {
 			},
 
 			{
-				Name:  "coder",
-				Usage: "AI Coder",
-
-				HideHelp: true,
-
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					cli.Info()
-					return agent.RunCoder(ctx, client, model)
-				},
-			},
-
-			{
 				Name:  "rag",
 				Usage: "RAG Chat",
 
@@ -131,6 +119,18 @@ func initApp() cli.Command {
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					cli.Info()
 					return agent.RunMCP(ctx, client, model)
+				},
+			},
+
+			{
+				Name:  "coder",
+				Usage: "AI Coder",
+
+				HideHelp: true,
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					cli.Info()
+					return agent.RunCoder(ctx, client, model)
 				},
 			},
 
