@@ -6,7 +6,6 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.2
 	github.com/adrianliechti/go-cli v0.0.5
-	github.com/adrianliechti/go-hnsw v0.0.0-20250422111325-e2fc886ce8eb
 	github.com/adrianliechti/wingman v0.0.0-20250416201402-92fa22782b0f
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/getkin/kin-openapi v0.131.0
@@ -63,7 +62,6 @@ require (
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250327172914-2fdc97757edf // indirect
 	github.com/charmbracelet/x/exp/strings v0.0.0-20240722160745-212f7b056ed0 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
-	github.com/chewxy/math32 v1.10.1 // indirect
 	github.com/cohere-ai/cohere-go/v2 v2.14.1 // indirect
 	github.com/coreos/go-oidc/v3 v3.14.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -118,8 +116,6 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/urfave/cli/v3 v3.1.1 // indirect
 	github.com/vincent-petithory/dataurl v1.0.0 // indirect
-	github.com/viterin/partial v1.1.0 // indirect
-	github.com/viterin/vek v0.4.2 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
