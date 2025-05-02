@@ -124,7 +124,7 @@ func initApp() cli.Command {
 
 			{
 				Name:  "coder",
-				Usage: "AI Coder",
+				Usage: "Code Agent",
 
 				HideHelp: true,
 
