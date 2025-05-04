@@ -17,6 +17,7 @@ import (
 	"github.com/adrianliechti/go-cli"
 	"github.com/adrianliechti/wingman-cli/app/agent"
 	"github.com/adrianliechti/wingman-cli/pkg/index"
+	"github.com/adrianliechti/wingman-cli/pkg/index/local"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/retriever"
 
 	wingman "github.com/adrianliechti/wingman/pkg/client"
@@ -37,7 +38,7 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 		return err
 	}
 
-	index, err := index.New(filepath.Join(root, "wingman.db"))
+	index, err := local.New(filepath.Join(root, "wingman.db"))
 
 	if err != nil {
 		return err
@@ -63,7 +64,7 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 	})
 }
 
-func IndexDir(ctx context.Context, client *wingman.Client, i *index.Index, root string) error {
+func IndexDir(ctx context.Context, client *wingman.Client, i index.Index, root string) error {
 	supported := []string{
 		".csv",
 		".md",

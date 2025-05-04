@@ -11,11 +11,11 @@ import (
 )
 
 type Retriever struct {
-	index  *index.Index
+	index  index.Index
 	client *wingman.Client
 }
 
-func New(client *wingman.Client, index *index.Index) *Retriever {
+func New(client *wingman.Client, index index.Index) *Retriever {
 	return &Retriever{
 		index:  index,
 		client: client,
