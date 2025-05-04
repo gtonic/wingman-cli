@@ -10,6 +10,7 @@ import (
 	"github.com/adrianliechti/wingman-cli/app/chat"
 	"github.com/adrianliechti/wingman-cli/app/complete"
 	"github.com/adrianliechti/wingman-cli/app/rag"
+	"github.com/adrianliechti/wingman-cli/pkg/ingest"
 
 	"github.com/adrianliechti/go-cli"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
@@ -21,8 +22,6 @@ var version string
 
 func main() {
 	godotenv.Load()
-	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
-	// defer stop()
 
 	ctx := context.Background()
 
@@ -100,13 +99,61 @@ func initApp() cli.Command {
 
 			{
 				Name:  "rag",
-				Usage: "RAG Chat",
+				Usage: "Local RAG Chat",
 
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					cli.Info()
 					return rag.Run(ctx, client, model)
+				},
+			},
+
+			{
+				Name:  "ingest",
+				Usage: "Server Side RAG Ingest",
+
+				HideHelp: true,
+
+				Flags: []cli.Flag{
+
+					&cli.StringFlag{
+						Name:  "url",
+						Usage: "Platform URL, e.g. 'http://localhost:8080'",
+
+						Required: true,
+					},
+
+					&cli.StringFlag{
+						Name:  "token",
+						Usage: "Platform token",
+					},
+
+					&cli.StringFlag{
+						Name:  "index",
+						Usage: "Name of RAG index, e.g. 'docs'",
+					},
+
+					&cli.StringFlag{
+						Name:  "dir",
+						Usage: "Directory to index",
+					},
+
+					&cli.StringFlag{
+						Name:  "embedding",
+						Usage: "Embedding, e.g. 'text-embedding-3-large'",
+					},
+				},
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					url := cmd.String("url")
+					token := cmd.String("token")
+					index := cmd.String("index")
+					dir := cmd.String("dir")
+					embedding := cmd.String("embedding")
+
+					cli.Info()
+					return ingest.RunIngest(ctx, client, model, url, token, index, dir, embedding)
 				},
 			},
 
