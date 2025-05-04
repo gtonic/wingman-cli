@@ -35,6 +35,7 @@ func main() {
 func initApp() cli.Command {
 	url := os.Getenv("WINGMAN_URL")
 	model := os.Getenv("WINGMAN_MODEL")
+	token := os.Getenv("WINGMAN_TOKEN")
 
 	if url == "" {
 		url = "http://localhost:8080"
@@ -42,7 +43,7 @@ func initApp() cli.Command {
 
 	var options []wingman.RequestOption
 
-	if token := os.Getenv("WINGMAN_TOKEN"); token != "" {
+	if token != "" {
 		options = append(options, wingman.WithToken(token))
 	}
 
@@ -118,36 +119,28 @@ func initApp() cli.Command {
 				Flags: []cli.Flag{
 
 					&cli.StringFlag{
-						Name:  "url",
-						Usage: "Platform URL, e.g. 'http://localhost:8080'",
+						Name:  "index",
+						Usage: "Name of RAG index, e.g. 'docs'",
 
 						Required: true,
 					},
 
 					&cli.StringFlag{
-						Name:  "token",
-						Usage: "Platform token",
-					},
-
-					&cli.StringFlag{
-						Name:  "index",
-						Usage: "Name of RAG index, e.g. 'docs'",
-					},
-
-					&cli.StringFlag{
 						Name:  "dir",
 						Usage: "Directory to index",
+
+						Required: true,
 					},
 
 					&cli.StringFlag{
 						Name:  "embedding",
 						Usage: "Embedding, e.g. 'text-embedding-3-large'",
+
+						Required: true,
 					},
 				},
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					url := cmd.String("url")
-					token := cmd.String("token")
 					index := cmd.String("index")
 					dir := cmd.String("dir")
 					embedding := cmd.String("embedding")

@@ -344,9 +344,8 @@ func writeJSON(dir, name string, v any) error {
 
 // Run runs the ingest command
 func RunIngest(ctx context.Context, client *client.Client, model string, url string, token string, index string, dir string, embedding string) error {
-	// For now, just print a message and return nil
-	// You can implement the actual ingest logic here as needed
-	fmt.Println("Ingest command executed with model:", model)
+
+	fmt.Printf("Ingesting directory %v into index %v ...\n", dir, index)
 
 	opts := []wingman.RequestOption{}
 
@@ -360,5 +359,6 @@ func RunIngest(ctx context.Context, client *client.Client, model string, url str
 		panic(err)
 	}
 
+	fmt.Printf("Successfully indexed directory %v\n", dir)
 	return nil
 }
