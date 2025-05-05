@@ -4,21 +4,17 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/adrianliechti/wingman-cli/pkg/index"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
-
-	wingman "github.com/adrianliechti/wingman/pkg/client"
+	"github.com/adrianliechti/wingman/pkg/index"
 )
 
 type Retriever struct {
-	index  index.Index
-	client *wingman.Client
+	index index.Provider
 }
 
-func New(client *wingman.Client, index index.Index) *Retriever {
+func New(index index.Provider) *Retriever {
 	return &Retriever{
-		index:  index,
-		client: client,
+		index: index,
 	}
 }
 
@@ -56,17 +52,11 @@ func (r *Retriever) Tools(ctx context.Context) ([]tool.Tool, error) {
 					return nil, err
 				}
 
-				embeddings, err := r.client.Embeddings.New(ctx, wingman.EmbeddingsRequest{
-					Texts: []string{parameters.Query},
+				limit := 5
+
+				documents, err := r.index.Query(ctx, parameters.Query, &index.QueryOptions{
+					Limit: &limit,
 				})
-
-				if err != nil {
-					return nil, err
-				}
-
-				vector := embeddings.Embeddings[0]
-
-				documents, err := r.index.Search(ctx, vector, 10)
 
 				if err != nil {
 					return nil, err
@@ -75,7 +65,7 @@ func (r *Retriever) Tools(ctx context.Context) ([]tool.Tool, error) {
 				var texts []string
 
 				for _, d := range documents {
-					texts = append(texts, d.Text)
+					texts = append(texts, d.Content)
 				}
 
 				return texts, nil
