@@ -16,11 +16,11 @@ import (
 
 	"github.com/adrianliechti/go-cli"
 	"github.com/adrianliechti/wingman-cli/app/agent"
-	"github.com/adrianliechti/wingman-cli/pkg/index"
 	"github.com/adrianliechti/wingman-cli/pkg/index/local"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/retriever"
 
 	wingman "github.com/adrianliechti/wingman/pkg/client"
+	"github.com/adrianliechti/wingman/pkg/index"
 )
 
 var (
@@ -38,7 +38,7 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 		return err
 	}
 
-	index, err := local.New(filepath.Join(root, "wingman.db"))
+	index, err := local.New(filepath.Join(root, "wingman.db"), &embeder{client})
 
 	if err != nil {
 		return err
@@ -50,9 +50,7 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 
 	cli.Info()
 
-	retriever := retriever.New(client, index)
-
-	tools, err := retriever.Tools(ctx)
+	tools, err := retriever.New(index).Tools(ctx)
 
 	if err != nil {
 		return err
@@ -64,7 +62,7 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 	})
 }
 
-func IndexDir(ctx context.Context, client *wingman.Client, i index.Index, root string) error {
+func IndexDir(ctx context.Context, client *wingman.Client, i index.Provider, root string) error {
 	supported := []string{
 		".csv",
 		".md",
@@ -174,21 +172,11 @@ func IndexDir(ctx context.Context, client *wingman.Client, i index.Index, root s
 			return nil
 		}
 
-		var records []index.Record
+		var documents []index.Document
 
 		for i, segment := range segments {
-			embeddings, err := client.Embeddings.New(ctx, wingman.EmbeddingsRequest{
-				Texts: []string{segment.Text},
-			})
-
-			if err != nil {
-				result = errors.Join(result, err)
-				continue
-			}
-
-			record := index.Record{
-				Text:   segment.Text,
-				Vector: embeddings.Embeddings[0],
+			document := index.Document{
+				Content: segment.Text,
 
 				Metadata: map[string]string{
 					"path": "/" + rel,
@@ -198,10 +186,10 @@ func IndexDir(ctx context.Context, client *wingman.Client, i index.Index, root s
 				},
 			}
 
-			records = append(records, record)
+			documents = append(documents, document)
 		}
 
-		if err := i.Index(ctx, records...); err != nil {
+		if err := i.Index(ctx, documents...); err != nil {
 			result = errors.Join(result, err)
 			return nil
 		}

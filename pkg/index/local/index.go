@@ -10,7 +10,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/adrianliechti/wingman-cli/pkg/index"
+	"github.com/adrianliechti/wingman/pkg/index"
 
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -20,12 +20,17 @@ import (
 	"github.com/ncruces/go-sqlite3/gormlite"
 )
 
-var _ index.Index = (*Index)(nil)
+var _ index.Provider = (*Index)(nil)
 
 type Index struct {
 	db *gorm.DB
 
-	vectors map[uint][]float32
+	vectors  map[uint][]float32
+	embedder Embedder
+}
+
+type Embedder interface {
+	Embed(ctx context.Context, text string) ([]float32, error)
 }
 
 type RecordModel struct {
@@ -37,7 +42,7 @@ type RecordModel struct {
 	Metadata datatypes.JSONMap
 }
 
-func New(path string) (*Index, error) {
+func New(path string, embedder Embedder) (*Index, error) {
 	db, err := gorm.Open(gormlite.Open(path), &gorm.Config{})
 
 	if err != nil {
@@ -51,7 +56,8 @@ func New(path string) (*Index, error) {
 	i := &Index{
 		db: db,
 
-		vectors: make(map[uint][]float32),
+		vectors:  make(map[uint][]float32),
+		embedder: embedder,
 	}
 
 	if err := i.indexEmbeddings(); err != nil {
@@ -79,7 +85,7 @@ func (i *Index) indexEmbeddings() error {
 	return result.Error
 }
 
-func (i *Index) List(ctx context.Context, options *index.ListOptions) (*index.Page[index.Record], error) {
+func (i *Index) List(ctx context.Context, options *index.ListOptions) (*index.Page[index.Document], error) {
 	if options == nil {
 		options = new(index.ListOptions)
 	}
@@ -117,27 +123,29 @@ func (i *Index) List(ctx context.Context, options *index.ListOptions) (*index.Pa
 		limit = 10
 	}
 
-	var models []RecordModel
+	var records []RecordModel
 
-	if result := i.db.Offset(offset).Limit(limit).Find(&models); result.Error != nil {
+	if result := i.db.Offset(offset).Limit(limit).Find(&records); result.Error != nil {
 		return nil, result.Error
 	}
 
-	page := &index.Page[index.Record]{}
+	page := &index.Page[index.Document]{}
 
-	for _, m := range models {
+	for _, r := range records {
 		metadata := map[string]string{}
 
-		for k, v := range m.Metadata {
+		for k, v := range r.Metadata {
 			metadata[k] = v.(string)
 		}
 
-		page.Items = append(page.Items, index.Record{
-			ID: fmt.Sprintf("%d", m.ID),
+		page.Items = append(page.Items, index.Document{
+			ID: fmt.Sprintf("%d", r.ID),
 
-			Text:     m.Text,
-			Vector:   m.Vector,
+			Content: r.Text,
+
 			Metadata: metadata,
+
+			Embedding: r.Vector,
 		})
 	}
 
@@ -152,20 +160,20 @@ func (i *Index) List(ctx context.Context, options *index.ListOptions) (*index.Pa
 	return page, nil
 }
 
-func (i *Index) Index(ctx context.Context, record ...index.Record) error {
-	for _, r := range record {
+func (i *Index) Index(ctx context.Context, documents ...index.Document) error {
+	for _, d := range documents {
 		m := &RecordModel{
-			Text: r.Text,
+			Text: d.Content,
 		}
 
-		if len(r.Vector) > 0 {
-			m.Vector = datatypes.NewJSONSlice(r.Vector)
+		if len(d.Embedding) > 0 {
+			m.Vector = datatypes.NewJSONSlice(d.Embedding)
 		}
 
-		if len(r.Metadata) > 0 {
+		if len(d.Metadata) > 0 {
 			metadata := datatypes.JSONMap{}
 
-			for k, v := range r.Metadata {
+			for k, v := range d.Metadata {
 				metadata[k] = v
 			}
 
@@ -180,15 +188,31 @@ func (i *Index) Index(ctx context.Context, record ...index.Record) error {
 			return result.Error
 		}
 
-		if len(r.Vector) > 0 {
-			i.vectors[m.ID] = r.Vector
+		if len(d.Embedding) > 0 {
+			i.vectors[m.ID] = d.Embedding
 		}
 	}
 
 	return nil
 }
 
-func (i *Index) Search(ctx context.Context, vector []float32, topK int) ([]index.Record, error) {
+func (i *Index) Query(ctx context.Context, query string, options *index.QueryOptions) ([]index.Result, error) {
+	if options == nil {
+		options = new(index.QueryOptions)
+	}
+
+	vector, err := i.embedder.Embed(ctx, query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	limit := 10
+
+	if options.Limit != nil {
+		limit = *options.Limit
+	}
+
 	type scoredID struct {
 		ID    uint
 		score float64
@@ -212,7 +236,7 @@ func (i *Index) Search(ctx context.Context, vector []float32, topK int) ([]index
 	var ids []uint
 
 	for _, n := range scores {
-		if len(ids) >= topK {
+		if len(ids) >= limit {
 			break
 		}
 
@@ -225,7 +249,7 @@ func (i *Index) Search(ctx context.Context, vector []float32, topK int) ([]index
 		return nil, result.Error
 	}
 
-	var result []index.Record
+	var results []index.Result
 
 	for _, m := range models {
 		metadata := map[string]string{}
@@ -234,15 +258,27 @@ func (i *Index) Search(ctx context.Context, vector []float32, topK int) ([]index
 			metadata[k] = v.(string)
 		}
 
-		result = append(result, index.Record{
-			ID: fmt.Sprintf("%d", m.ID),
+		result := index.Result{
+			Document: index.Document{
+				ID: fmt.Sprintf("%d", m.ID),
 
-			Text:     m.Text,
-			Metadata: metadata,
-		})
+				Content:  m.Text,
+				Metadata: metadata,
+			},
+		}
+
+		for _, s := range scores {
+			if s.ID != m.ID {
+				continue
+			}
+
+			result.Score = float32(s.score)
+		}
+
+		results = append(results, result)
 	}
 
-	return result, nil
+	return results, nil
 }
 
 func (i *Index) Delete(ctx context.Context, ids ...string) error {
