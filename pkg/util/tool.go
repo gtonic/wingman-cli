@@ -4,72 +4,29 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"os"
 	"strings"
 
-	"github.com/adrianliechti/wingman-cli/pkg/mcp"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
-
 	wingman "github.com/adrianliechti/wingman/pkg/client"
-	"github.com/adrianliechti/wingman/pkg/template"
 )
 
-func ParsePrompt() (string, error) {
-	for _, name := range []string{".prompt.md", ".prompt.txt", "prompt.md", "prompt.txt"} {
-		if _, err := os.Stat(name); os.IsNotExist(err) {
-			continue
-		}
+func ConvertTools(tools []tool.Tool) []wingman.Tool {
+	var result []wingman.Tool
 
-		data, err := os.ReadFile(name)
-
-		if err != nil {
-			return "", err
-		}
-
-		prompt := strings.TrimSpace(string(data))
-
-		tmpl, err := template.NewTemplate(prompt)
-
-		if err != nil {
-			return "", err
-		}
-
-		prompt, err = tmpl.Execute(nil)
-
-		if err != nil {
-			return "", err
-		}
-
-		return prompt, nil
+	for _, t := range tools {
+		result = append(result, ConvertTool(t))
 	}
 
-	return "", nil
+	return result
 }
 
-func ParseMCP() ([]tool.Tool, error) {
-	ctx := context.Background()
+func ConvertTool(t tool.Tool) wingman.Tool {
+	return wingman.Tool{
+		Name:        t.Name,
+		Description: t.Description,
 
-	for _, name := range []string{".mcp.json", ".mcp.yaml", "mcp.json", "mcp.yaml"} {
-		if _, err := os.Stat(name); os.IsNotExist(err) {
-			continue
-		}
-
-		cfg, err := mcp.Parse(name)
-
-		if err != nil {
-			return nil, err
-		}
-
-		mcp, err := mcp.New(cfg)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return mcp.Tools(ctx)
+		Parameters: t.Schema,
 	}
-
-	return nil, nil
 }
 
 func OptimizeTools(client *wingman.Client, model string, tools []tool.Tool) []tool.Tool {
@@ -166,24 +123,5 @@ func OptimizeTool(client *wingman.Client, model string, t tool.Tool) tool.Tool {
 
 			return content, nil
 		},
-	}
-}
-
-func ConvertTools(tools []tool.Tool) []wingman.Tool {
-	var result []wingman.Tool
-
-	for _, t := range tools {
-		result = append(result, ConvertTool(t))
-	}
-
-	return result
-}
-
-func ConvertTool(t tool.Tool) wingman.Tool {
-	return wingman.Tool{
-		Name:        t.Name,
-		Description: t.Description,
-
-		Parameters: t.Schema,
 	}
 }

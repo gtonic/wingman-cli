@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 
+	"github.com/adrianliechti/wingman-cli/app"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/azure"
 	"github.com/adrianliechti/wingman-cli/pkg/util"
@@ -17,14 +18,17 @@ var (
 	prompt_azure string
 )
 
-func RunAzure(ctx context.Context, client *wingman.Client, model string) error {
-	cli.Info("🤗 Hello, I'm your Azure AI Assistant")
-	cli.Info()
-
+func RunAzure(ctx context.Context, client *wingman.Client) error {
 	azure, err := azure.New()
 
 	if err != nil {
 		return err
+	}
+
+	prompt := app.MustParsePrompt()
+
+	if prompt == "" {
+		prompt = prompt_azure
 	}
 
 	var tools []tool.Tool
@@ -33,12 +37,11 @@ func RunAzure(ctx context.Context, client *wingman.Client, model string) error {
 		tools = append(tools, t...)
 	}
 
-	tools = util.OptimizeTools(client, model, tools)
+	tools = util.OptimizeTools(client, app.DefaultModel, tools)
 
 	cli.Info()
+	cli.Info("🤗 Hello, I'm your Azure AI Assistant")
+	cli.Info()
 
-	return Run(ctx, client, model, tools, &RunOptions{
-		Prompt:     prompt_azure,
-		PromptFile: true,
-	})
+	return Run(ctx, client, app.ThinkingModel, prompt, tools)
 }

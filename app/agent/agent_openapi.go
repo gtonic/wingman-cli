@@ -8,6 +8,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/adrianliechti/wingman-cli/app"
 	"github.com/adrianliechti/wingman-cli/pkg/rest"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/openapi"
 	"github.com/adrianliechti/wingman-cli/pkg/util"
@@ -21,10 +22,7 @@ var (
 	prompt_openapi string
 )
 
-func RunOpenAPI(ctx context.Context, client *wingman.Client, model string, path, url, bearer, username, password string) error {
-	cli.Info("🤗 Hello, I'm your OpenAPI AI Assistant")
-	cli.Info()
-
+func RunOpenAPI(ctx context.Context, client *wingman.Client, path, url, bearer, username, password string) error {
 	c, err := rest.New(url,
 		rest.WithBearer(bearer),
 		rest.WithBasicAuth(username, password),
@@ -41,17 +39,25 @@ func RunOpenAPI(ctx context.Context, client *wingman.Client, model string, path,
 		return err
 	}
 
+	prompt := app.MustParsePrompt()
+
+	if prompt == "" {
+		prompt = prompt_openapi
+	}
+
 	tools, err := catalog.Tools(ctx)
 
 	if err != nil {
 		return err
 	}
 
-	tools = util.OptimizeTools(client, model, tools)
+	tools = util.OptimizeTools(client, app.DefaultModel, tools)
 
-	return Run(ctx, client, model, tools, &RunOptions{
-		Prompt: prompt_openapi,
-	})
+	cli.Info()
+	cli.Info("🤗 Hello, I'm your OpenAPI AI Assistant")
+	cli.Info()
+
+	return Run(ctx, client, app.ThinkingModel, prompt, tools)
 }
 
 func handleConfirm(method, path, contentType string, body io.Reader) error {

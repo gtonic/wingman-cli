@@ -6,49 +6,34 @@ import (
 	"os"
 	"strings"
 
+	"github.com/adrianliechti/wingman-cli/app"
 	"github.com/adrianliechti/wingman-cli/app/agent"
 	"github.com/adrianliechti/wingman-cli/app/chat"
 	"github.com/adrianliechti/wingman-cli/app/complete"
 	"github.com/adrianliechti/wingman-cli/app/rag"
 
 	"github.com/adrianliechti/go-cli"
-	wingman "github.com/adrianliechti/wingman/pkg/client"
-
 	"github.com/joho/godotenv"
+
+	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
 var version string
 
 func main() {
 	godotenv.Load()
-	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
-	// defer stop()
 
 	ctx := context.Background()
 
-	app := initApp()
+	client := app.MustClient(ctx)
+	app := initApp(client)
 
 	if err := app.Run(ctx, os.Args); err != nil {
 		panic(err)
 	}
 }
 
-func initApp() cli.Command {
-	url := os.Getenv("WINGMAN_URL")
-	model := os.Getenv("WINGMAN_MODEL")
-
-	if url == "" {
-		url = "http://localhost:8080"
-	}
-
-	var options []wingman.RequestOption
-
-	if token := os.Getenv("WINGMAN_TOKEN"); token != "" {
-		options = append(options, wingman.WithToken(token))
-	}
-
-	client := wingman.New(url, options...)
-
+func initApp(client *wingman.Client) cli.Command {
 	return cli.Command{
 		Usage: "Wingman AI CLI",
 
@@ -73,13 +58,11 @@ func initApp() cli.Command {
 					prompt += input
 				}
 
-				cli.Info()
-				return complete.Run(ctx, client, model, prompt)
+				return complete.Run(ctx, client, app.DefaultModel, prompt)
 			}
 
 			if cmd.Args().Len() > 0 {
-				cli.Info()
-				return complete.Run(ctx, client, model, prompt)
+				return complete.Run(ctx, client, app.DefaultModel, prompt)
 			}
 
 			return cli.ShowCommandHelp(cmd)
@@ -93,8 +76,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					cli.Info()
-					return chat.Run(ctx, client, model)
+					return chat.Run(ctx, client, app.DefaultModel)
 				},
 			},
 
@@ -105,8 +87,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					cli.Info()
-					return rag.Run(ctx, client, model)
+					return rag.Run(ctx, client, app.DefaultModel)
 				},
 			},
 
@@ -117,8 +98,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					cli.Info()
-					return agent.RunMCP(ctx, client, model)
+					return agent.RunMCP(ctx, client)
 				},
 			},
 
@@ -129,8 +109,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					cli.Info()
-					return agent.RunCoder(ctx, client, model)
+					return agent.RunCoder(ctx, client)
 				},
 			},
 
@@ -141,8 +120,7 @@ func initApp() cli.Command {
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					cli.Info()
-					return agent.RunAzure(ctx, client, model)
+					return agent.RunAzure(ctx, client)
 				},
 			},
 
@@ -192,7 +170,7 @@ func initApp() cli.Command {
 					password := cmd.String("password")
 
 					cli.Info()
-					return agent.RunOpenAPI(ctx, client, model, path, url, bearer, username, password)
+					return agent.RunOpenAPI(ctx, client, path, url, bearer, username, password)
 				},
 			},
 		},

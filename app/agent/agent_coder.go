@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 
+	"github.com/adrianliechti/wingman-cli/app"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/cmd"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/fs"
@@ -18,15 +19,16 @@ var (
 	prompt_coder string
 )
 
-func RunCoder(ctx context.Context, client *wingman.Client, model string) error {
-	cli.Info("🤗 Hello, I'm your AI Coder")
-	cli.Info()
-
+func RunCoder(ctx context.Context, client *wingman.Client) error {
 	fs, err := fs.New("")
 
 	if err != nil {
 		return err
 	}
+
+	cli.Info()
+	cli.Info("🤗 Hello, I'm your AI Coder")
+	cli.Info()
 
 	var tools []tool.Tool
 
@@ -36,18 +38,12 @@ func RunCoder(ctx context.Context, client *wingman.Client, model string) error {
 
 	for _, name := range []string{"git", "wget", "curl", "docker", "kubectl", "helm", "jq", "yq"} {
 		if c, err := cmd.New(name); err == nil {
-			println("🔨 " + name)
-
 			t, _ := c.Tools(ctx)
-			t = util.OptimizeTools(client, model, t)
+			t = util.OptimizeTools(client, app.DefaultModel, t)
 
 			tools = append(tools, t...)
 		}
 	}
 
-	cli.Info()
-
-	return Run(ctx, client, model, tools, &RunOptions{
-		Prompt: prompt_coder,
-	})
+	return Run(ctx, client, app.ThinkingModel, prompt_coder, tools)
 }

@@ -16,26 +16,7 @@ import (
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
-type RunOptions struct {
-	Prompt     string
-	PromptFile bool
-}
-
-func Run(ctx context.Context, client *wingman.Client, model string, tools []tool.Tool, options *RunOptions) error {
-	if options == nil {
-		options = new(RunOptions)
-	}
-
-	if options.PromptFile {
-		prompt, err := util.ParsePrompt()
-
-		if err != nil {
-			return err
-		}
-
-		options.Prompt = prompt
-	}
-
+func Run(ctx context.Context, client *wingman.Client, model, prompt string, tools []tool.Tool) error {
 	input := wingman.CompletionRequest{
 		Model: model,
 
@@ -44,8 +25,8 @@ func Run(ctx context.Context, client *wingman.Client, model string, tools []tool
 		},
 	}
 
-	if options.Prompt != "" {
-		input.Messages = append(input.Messages, wingman.SystemMessage(options.Prompt))
+	if prompt != "" {
+		input.Messages = append(input.Messages, wingman.SystemMessage(prompt))
 	}
 
 	for {
