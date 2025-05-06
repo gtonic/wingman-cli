@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/go-cli"
+	"github.com/adrianliechti/wingman-cli/app"
 	"github.com/adrianliechti/wingman-cli/app/agent"
 	"github.com/adrianliechti/wingman-cli/pkg/index/local"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/retriever"
@@ -29,13 +30,15 @@ var (
 )
 
 func Run(ctx context.Context, client *wingman.Client, model string) error {
+	cli.Info()
 	cli.Info("🤗 Hello, I'm your RAG")
 	cli.Info()
 
-	root, err := filepath.Abs(".")
+	root := app.MustDir()
+	prompt := app.MustParsePrompt()
 
-	if err != nil {
-		return err
+	if prompt == "" {
+		prompt = prompt_rag
 	}
 
 	index, err := local.New(filepath.Join(root, "wingman.db"), &embeder{client})
@@ -56,10 +59,7 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 		return err
 	}
 
-	return agent.Run(ctx, client, model, tools, &agent.RunOptions{
-		Prompt:     prompt_rag,
-		PromptFile: true,
-	})
+	return agent.Run(ctx, client, model, prompt, tools)
 }
 
 func IndexDir(ctx context.Context, client *wingman.Client, i index.Provider, root string) error {

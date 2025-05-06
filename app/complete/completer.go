@@ -15,6 +15,8 @@ func Run(ctx context.Context, client *wingman.Client, model, prompt string) erro
 		return nil
 	}
 
+	cli.Info()
+
 	input := wingman.CompletionRequest{
 		Model: model,
 

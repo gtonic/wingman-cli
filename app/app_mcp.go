@@ -1,4 +1,4 @@
-package util
+package app
 
 import (
 	"context"
@@ -7,6 +7,16 @@ import (
 	"github.com/adrianliechti/wingman-cli/pkg/mcp"
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 )
+
+func MustParseMCP() []tool.Tool {
+	tools, err := ParseMCP()
+
+	if err != nil {
+		panic(err)
+	}
+
+	return tools
+}
 
 func ParseMCP() ([]tool.Tool, error) {
 	ctx := context.Background()

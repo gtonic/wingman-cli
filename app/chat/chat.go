@@ -3,9 +3,8 @@ package chat
 import (
 	"context"
 
-	"github.com/adrianliechti/wingman-cli/pkg/util"
-
 	"github.com/adrianliechti/go-cli"
+	"github.com/adrianliechti/wingman-cli/app"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
@@ -21,9 +20,11 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 		},
 	}
 
-	if system, err := util.ParsePrompt(); err == nil {
-		input.Messages = append(input.Messages, wingman.SystemMessage(system))
+	if prompt, err := app.ParsePrompt(); err == nil {
+		input.Messages = append(input.Messages, wingman.SystemMessage(prompt))
 	}
+
+	cli.Info()
 
 	for {
 		prompt, err := cli.Text("", "")

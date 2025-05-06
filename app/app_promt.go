@@ -1,4 +1,4 @@
-package util
+package app
 
 import (
 	"os"
@@ -6,6 +6,16 @@ import (
 
 	"github.com/adrianliechti/wingman/pkg/template"
 )
+
+func MustParsePrompt() string {
+	prompt, err := ParsePrompt()
+
+	if err != nil {
+		panic(err)
+	}
+
+	return prompt
+}
 
 func ParsePrompt() (string, error) {
 	for _, name := range []string{".prompt.md", ".prompt.txt", "prompt.md", "prompt.txt"} {
