@@ -166,6 +166,16 @@ func (i *Index) Index(ctx context.Context, documents ...index.Document) error {
 			Text: d.Content,
 		}
 
+		if len(d.Embedding) == 0 && i.embedder != nil {
+			embedding, err := i.embedder.Embed(ctx, d.Content)
+
+			if err != nil {
+				return err
+			}
+
+			d.Embedding = embedding
+		}
+
 		if len(d.Embedding) > 0 {
 			m.Vector = datatypes.NewJSONSlice(d.Embedding)
 		}
@@ -233,19 +243,23 @@ func (i *Index) Query(ctx context.Context, query string, options *index.QueryOpt
 		return cmp.Compare(b.score, a.score)
 	})
 
-	var ids []uint
+	var conds []uint
 
 	for _, n := range scores {
-		if len(ids) >= limit {
+		if len(conds) >= limit {
 			break
 		}
 
-		ids = append(ids, n.ID)
+		conds = append(conds, n.ID)
+	}
+
+	if len(conds) == 0 {
+		return []index.Result{}, nil
 	}
 
 	var models []RecordModel
 
-	if result := i.db.Find(&models, ids); result.Error != nil {
+	if result := i.db.Find(&models, conds); result.Error != nil {
 		return nil, result.Error
 	}
 
@@ -282,7 +296,7 @@ func (i *Index) Query(ctx context.Context, query string, options *index.QueryOpt
 }
 
 func (i *Index) Delete(ctx context.Context, ids ...string) error {
-	var identifiers []uint
+	var conds []uint
 
 	for _, id := range ids {
 		val, err := strconv.ParseUint(id, 10, 32)
@@ -291,10 +305,10 @@ func (i *Index) Delete(ctx context.Context, ids ...string) error {
 			continue
 		}
 
-		identifiers = append(identifiers, uint(val))
+		conds = append(conds, uint(val))
 	}
 
-	result := i.db.Unscoped().Delete(&RecordModel{}, identifiers)
+	result := i.db.Unscoped().Delete(&RecordModel{}, conds)
 	return result.Error
 }
 

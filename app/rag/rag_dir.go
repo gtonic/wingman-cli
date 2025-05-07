@@ -86,15 +86,21 @@ func IndexDir(ctx context.Context, client *wingman.Client, i index.Provider, roo
 			return nil
 		}
 
+		name := filepath.Base(path)
+
+		rel, _ := filepath.Rel(root, path)
+		rel = filepath.ToSlash(rel)
+
+		if strings.HasPrefix(rel, ".") || strings.Contains(path, "/.") {
+			return nil
+		}
+
 		data, err := os.ReadFile(path)
 
 		if err != nil {
 			result = errors.Join(result, err)
 			return nil
 		}
-
-		rel, _ := filepath.Rel(root, path)
-		name := filepath.Base(path)
 
 		md5_hash := md5.Sum(data)
 		md5_text := hex.EncodeToString(md5_hash[:])

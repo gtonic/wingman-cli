@@ -69,14 +69,14 @@ func IndexResources(ctx context.Context, client *wingman.Client, i index.Provide
 		data, err := r.Content(ctx)
 
 		if err != nil {
-			result = errors.Join(result, err)
+			//result = errors.Join(result, err)
 			continue
 		}
 
 		md5_hash := md5.Sum(data)
 		md5_text := hex.EncodeToString(md5_hash[:])
 
-		cli.Infof("Indexing /%s...", r.URI)
+		cli.Infof("Indexing %s...", r.URI)
 
 		// extraction, err := client.Extractions.New(ctx, wingman.ExtractionRequest{
 		// 	Name:   name,
