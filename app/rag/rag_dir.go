@@ -63,6 +63,10 @@ func IndexDir(ctx context.Context, client *wingman.Client, i index.Provider, roo
 			path := i.Metadata["path"]
 			revision := i.Metadata["revision"]
 
+			if path == "" || revision == "" {
+				continue
+			}
+
 			mapping[path] = i.ID
 			candidates[path] = revision
 		}

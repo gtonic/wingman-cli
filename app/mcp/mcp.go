@@ -12,7 +12,7 @@ import (
 )
 
 func Run(ctx context.Context, client *wingman.Client) error {
-	tools := app.MustParseMCP()
+	tools := app.MustConnectTools(ctx)
 	prompt := app.MustParsePrompt()
 
 	tools = util.OptimizeTools(client, app.DefaultModel, tools)

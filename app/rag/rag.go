@@ -25,11 +25,14 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 	cli.Info()
 
 	root := app.MustDir()
+
 	prompt := app.MustParsePrompt()
 
 	if prompt == "" {
 		prompt = DefaultPrompt
 	}
+
+	resources := app.MustConnectResources(ctx)
 
 	index, err := local.New(filepath.Join(root, "wingman.db"), &embeder{client})
 
@@ -38,6 +41,10 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 	}
 
 	if err := IndexDir(ctx, client, index, root); err != nil {
+		return err
+	}
+
+	if err := IndexResources(ctx, client, index, resources); err != nil {
 		return err
 	}
 

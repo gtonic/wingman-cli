@@ -5,22 +5,20 @@ import (
 	"os"
 
 	"github.com/adrianliechti/wingman-cli/pkg/mcp"
-	"github.com/adrianliechti/wingman-cli/pkg/tool"
+	"github.com/adrianliechti/wingman-cli/pkg/resource"
 )
 
-func MustParseMCP() []tool.Tool {
-	tools, err := ParseMCP()
+func MustConnectResources(ctx context.Context) []resource.Resource {
+	resources, err := ConnectResources(ctx)
 
 	if err != nil {
 		panic(err)
 	}
 
-	return tools
+	return resources
 }
 
-func ParseMCP() ([]tool.Tool, error) {
-	ctx := context.Background()
-
+func ConnectResources(ctx context.Context) ([]resource.Resource, error) {
 	for _, name := range []string{".mcp.json", ".mcp.yaml", "mcp.json", "mcp.yaml"} {
 		if _, err := os.Stat(name); os.IsNotExist(err) {
 			continue
@@ -38,7 +36,7 @@ func ParseMCP() ([]tool.Tool, error) {
 			return nil, err
 		}
 
-		return mcp.Tools(ctx)
+		return mcp.Resources(ctx)
 	}
 
 	return nil, nil
