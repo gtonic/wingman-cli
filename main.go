@@ -14,6 +14,7 @@ import (
 	"github.com/adrianliechti/wingman-cli/app/mcp"
 	"github.com/adrianliechti/wingman-cli/app/openapi"
 	"github.com/adrianliechti/wingman-cli/app/rag"
+	"github.com/adrianliechti/wingman-cli/app/server"
 
 	"github.com/adrianliechti/go-cli"
 	"github.com/joho/godotenv"
@@ -102,6 +103,17 @@ func initApp(client *wingman.Client) cli.Command {
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					return mcp.Run(ctx, client)
+				},
+			},
+
+			{
+				Name:  "server",
+				Usage: "MCP Server",
+
+				HideHelp: true,
+
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					return server.Run(ctx, client)
 				},
 			},
 
