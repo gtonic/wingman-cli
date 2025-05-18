@@ -43,6 +43,10 @@ func New(config *Config) (*Client, error) {
 				return nil, err
 			}
 
+			if err := client.Start(ctx); err != nil {
+				return nil, err
+			}
+
 			c.clients[n] = client
 		default:
 			return nil, errors.New("invalid server type")
