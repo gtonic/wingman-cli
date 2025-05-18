@@ -50,12 +50,6 @@ func New(config *Config) (*Client, error) {
 	}
 
 	for _, c := range c.clients {
-		if err := c.Start(ctx); err != nil {
-			return nil, err
-		}
-	}
-
-	for _, c := range c.clients {
 		req := mcp.InitializeRequest{}
 		req.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
 		req.Params.ClientInfo = mcp.Implementation{
