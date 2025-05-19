@@ -80,6 +80,15 @@ func Run(ctx context.Context, client *wingman.Client) error {
 
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /.well-known/wingman", func(w http.ResponseWriter, r *http.Request) {
+		data := map[string]any{
+			"name": "wingman",
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(data)
+	})
+
 	mux.Handle("/sse", server)
 	mux.Handle("/message", server)
 
