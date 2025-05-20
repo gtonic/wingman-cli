@@ -1,4 +1,4 @@
-package server
+package bridge
 
 import (
 	"context"
@@ -48,7 +48,13 @@ func Run(ctx context.Context, client *wingman.Client) error {
 		}
 
 		s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			result, err := t.Execute(ctx, request.Params.Arguments)
+			args, err := convertArgs(request.Params.Arguments)
+
+			if err != nil {
+				return nil, err
+			}
+
+			result, err := t.Execute(ctx, args)
 
 			if err != nil {
 				return nil, err
@@ -97,4 +103,22 @@ func Run(ctx context.Context, client *wingman.Client) error {
 	}
 
 	return nil
+}
+
+func convertArgs(val any) (map[string]any, error) {
+	data, err := json.Marshal(val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var args map[string]any
+
+	if err := json.Unmarshal(data, &args); err == nil {
+		return args, nil
+	}
+
+	return map[string]any{
+		"input": val,
+	}, nil
 }

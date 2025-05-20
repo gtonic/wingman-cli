@@ -8,13 +8,13 @@ import (
 
 	"github.com/adrianliechti/wingman-cli/app"
 	"github.com/adrianliechti/wingman-cli/app/azure"
+	"github.com/adrianliechti/wingman-cli/app/bridge"
 	"github.com/adrianliechti/wingman-cli/app/chat"
 	"github.com/adrianliechti/wingman-cli/app/coder"
 	"github.com/adrianliechti/wingman-cli/app/complete"
 	"github.com/adrianliechti/wingman-cli/app/mcp"
 	"github.com/adrianliechti/wingman-cli/app/openapi"
 	"github.com/adrianliechti/wingman-cli/app/rag"
-	"github.com/adrianliechti/wingman-cli/app/server"
 
 	"github.com/adrianliechti/go-cli"
 	"github.com/joho/godotenv"
@@ -107,13 +107,13 @@ func initApp(client *wingman.Client) cli.Command {
 			},
 
 			{
-				Name:  "server",
-				Usage: "MCP Server",
+				Name:  "bridge",
+				Usage: "MCP Bridge",
 
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return server.Run(ctx, client)
+					return bridge.Run(ctx, client)
 				},
 			},
 
