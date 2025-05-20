@@ -6,7 +6,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.0
 	github.com/adrianliechti/go-cli v0.0.6
-	github.com/adrianliechti/wingman v0.0.0-20250518123544-8d9e0d4a8721
+	github.com/adrianliechti/wingman v0.0.0-20250519202054-2d6c1897928c
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/invopop/yaml v0.3.1
@@ -31,7 +31,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.1 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.4.2 // indirect
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
-	github.com/anthropics/anthropic-sdk-go v0.2.0-beta.3.0.20250517050459-6d4691c76d8b // indirect
+	github.com/anthropics/anthropic-sdk-go v0.2.0-beta.3.0.20250519194210-d67a151a6ef0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.36.3 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
@@ -103,7 +103,7 @@ require (
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
-	github.com/openai/openai-go v0.1.0-beta.10.0.20250516194940-e50580de825e // indirect
+	github.com/openai/openai-go v0.1.0-beta.10.0.20250519194122-421e3c5065ac // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/replicate/replicate-go v0.26.0 // indirect
