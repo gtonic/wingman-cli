@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/adrianliechti/wingman-cli/app"
-	"github.com/adrianliechti/wingman-cli/pkg/util"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -20,7 +19,7 @@ import (
 func Run(ctx context.Context, client *wingman.Client) error {
 	tools := app.MustConnectTools(ctx)
 
-	tools = util.OptimizeTools(client, app.DefaultModel, tools)
+	//tools = util.OptimizeTools(client, app.DefaultModel, tools)
 
 	cli.Info()
 	cli.Info("🖥️ MCP Server")
