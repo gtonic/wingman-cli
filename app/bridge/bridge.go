@@ -39,11 +39,26 @@ func Run(ctx context.Context, client *wingman.Client) error {
 	)
 
 	for _, t := range tools {
-		schema, _ := json.Marshal(t.Schema)
+		if _, ok := t.Schema["additionalProperties"]; !ok {
+			t.Schema["additionalProperties"] = false
+		}
+
+		if _, ok := t.Schema["required"]; !ok {
+			required := []string{}
+
+			for k := range t.Schema["properties"].(map[string]any) {
+				required = append(required, k)
+			}
+
+			t.Schema["required"] = required
+		}
+
+		schema, _ := json.MarshalIndent(t.Schema, "", "  ")
 
 		tool := mcp.Tool{
-			Name:           t.Name,
-			Description:    t.Description,
+			Name:        t.Name,
+			Description: t.Description,
+
 			RawInputSchema: schema,
 		}
 
