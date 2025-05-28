@@ -94,10 +94,6 @@ func Run(ctx context.Context, client *wingman.Client) error {
 
 	addr := "localhost:4200"
 
-	server := server.NewSSEServer(s,
-		server.WithBaseURL(fmt.Sprintf("http://%s", addr)),
-	)
-
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /.well-known/wingman", func(w http.ResponseWriter, r *http.Request) {
@@ -109,10 +105,24 @@ func Run(ctx context.Context, client *wingman.Client) error {
 		json.NewEncoder(w).Encode(data)
 	})
 
-	mux.Handle("/sse", server)
-	mux.Handle("/message", server)
+	h := server.NewSSEServer(s,
+		server.WithBaseURL(fmt.Sprintf("http://%s", addr)),
+	)
 
-	if err := http.ListenAndServe(addr, cors.AllowAll().Handler(mux)); err != nil {
+	mux.Handle("/sse", h)
+	mux.Handle("/message", h)
+
+	server := &http.Server{
+		Addr:    addr,
+		Handler: cors.AllowAll().Handler(mux),
+	}
+
+	go func() {
+		<-ctx.Done()
+		server.Shutdown(context.Background())
+	}()
+
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}
 
