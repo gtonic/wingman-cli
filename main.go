@@ -7,13 +7,11 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/wingman-cli/app"
-	"github.com/adrianliechti/wingman-cli/app/azure"
 	"github.com/adrianliechti/wingman-cli/app/bridge"
 	"github.com/adrianliechti/wingman-cli/app/chat"
 	"github.com/adrianliechti/wingman-cli/app/coder"
 	"github.com/adrianliechti/wingman-cli/app/complete"
 	"github.com/adrianliechti/wingman-cli/app/mcp"
-	"github.com/adrianliechti/wingman-cli/app/openapi"
 	"github.com/adrianliechti/wingman-cli/app/rag"
 
 	"github.com/adrianliechti/go-cli"
@@ -125,66 +123,6 @@ func initApp(client *wingman.Client) cli.Command {
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					return coder.Run(ctx, client)
-				},
-			},
-
-			{
-				Name:  "azure",
-				Usage: "Azure Agent",
-
-				HideHelp: true,
-
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return azure.Run(ctx, client)
-				},
-			},
-
-			{
-				Name:  "openapi",
-				Usage: "OpenAPI Agent",
-
-				HideHelp: true,
-
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:  "file",
-						Usage: "Specification",
-
-						Required: true,
-					},
-
-					&cli.StringFlag{
-						Name:  "url",
-						Usage: "API Base URL",
-
-						Required: true,
-					},
-
-					&cli.StringFlag{
-						Name:  "bearer",
-						Usage: "API Bearer",
-					},
-
-					&cli.StringFlag{
-						Name:  "username",
-						Usage: "API Username",
-					},
-
-					&cli.StringFlag{
-						Name:  "password",
-						Usage: "API Password",
-					},
-				},
-
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					path := cmd.String("file")
-
-					url := cmd.String("url")
-					bearer := cmd.String("bearer")
-					username := cmd.String("username")
-					password := cmd.String("password")
-
-					return openapi.Run(ctx, client, path, url, bearer, username, password)
 				},
 			},
 		},
