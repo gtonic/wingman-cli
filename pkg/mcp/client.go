@@ -3,74 +3,120 @@ package mcp
 import (
 	"context"
 	"errors"
+	"net/http"
+	"os"
+	"os/exec"
 
-	"github.com/mark3labs/mcp-go/client"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 type Client struct {
-	clients map[string]*client.Client
+	transports map[string]func() (mcp.Transport, error)
 }
 
 func New(config *Config) (*Client, error) {
 	c := &Client{
-		clients: make(map[string]*client.Client),
+		transports: make(map[string]func() (mcp.Transport, error)),
 	}
-
-	ctx := context.Background()
 
 	for n, s := range config.Servers {
 		switch s.Type {
-		case "stdio":
-			env := []string{}
+		case "stdio", "command":
+			env := os.Environ()
 
 			for k, v := range s.Env {
 				env = append(env, k+"="+v)
 			}
 
-			client, err := client.NewStdioMCPClient(s.Command, env, s.Args...)
+			c.transports[n] = func() (mcp.Transport, error) {
+				cmd := exec.Command(s.Command, s.Args...)
+				cmd.Env = env
 
-			if err != nil {
-				return nil, err
+				return mcp.NewCommandTransport(cmd), nil
 			}
 
-			c.clients[n] = client
+		case "http":
+			var client *http.Client
+
+			if len(s.Headers) > 0 {
+				client = &http.Client{
+					Transport: &rt{
+						headers: s.Headers,
+					},
+				}
+			}
+
+			c.transports[n] = func() (mcp.Transport, error) {
+				transport := mcp.NewStreamableClientTransport(s.URL, &mcp.StreamableClientTransportOptions{
+					HTTPClient: client,
+				})
+
+				return transport, nil
+			}
 
 		case "sse":
-			client, err := client.NewSSEMCPClient(s.URL, client.WithHeaders(s.Headers))
+			var client *http.Client
 
-			if err != nil {
-				return nil, err
+			if len(s.Headers) > 0 {
+				client = &http.Client{
+					Transport: &rt{
+						headers: s.Headers,
+					},
+				}
 			}
 
-			if err := client.Start(ctx); err != nil {
-				return nil, err
+			c.transports[n] = func() (mcp.Transport, error) {
+				transport := mcp.NewSSEClientTransport(s.URL, &mcp.SSEClientTransportOptions{
+					HTTPClient: client,
+				})
+
+				return transport, nil
 			}
 
-			c.clients[n] = client
 		default:
 			return nil, errors.New("invalid server type")
-		}
-	}
-
-	for _, c := range c.clients {
-		req := mcp.InitializeRequest{}
-		req.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
-		req.Params.ClientInfo = mcp.Implementation{
-			Name:    "wingman",
-			Version: "1.0.0",
-		}
-
-		if _, err := c.Initialize(ctx, req); err != nil {
-			return nil, err
 		}
 	}
 
 	return c, nil
 }
 
-func (c *Client) Close() {
-	for _, c := range c.clients {
-		c.Close()
+func (c *Client) createSession(ctx context.Context, server string) (*mcp.ClientSession, error) {
+	transportFn, ok := c.transports[server]
+
+	if !ok {
+		return nil, errors.New("unknown server: " + server)
 	}
+
+	transport, err := transportFn()
+
+	if err != nil {
+		return nil, err
+	}
+
+	client := mcp.NewClient("wingman", "1.0.0", nil)
+	return client.Connect(ctx, transport)
+}
+
+type rt struct {
+	headers   map[string]string
+	transport http.RoundTripper
+}
+
+func (rt *rt) RoundTrip(req *http.Request) (*http.Response, error) {
+	for key, value := range rt.headers {
+		if req.Header.Get(key) != "" {
+			continue // already set
+		}
+
+		req.Header.Set(key, value)
+	}
+
+	tr := rt.transport
+
+	if tr == nil {
+		tr = http.DefaultTransport
+	}
+
+	return tr.RoundTrip(req)
 }

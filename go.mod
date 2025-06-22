@@ -2,17 +2,19 @@ module github.com/adrianliechti/wingman-cli
 
 go 1.24.3
 
+replace github.com/modelcontextprotocol/go-sdk => github.com/findleyr/mcp v0.0.0-20250620211930-2a32e84b65e0
+
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.0
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.1
 	github.com/adrianliechti/go-cli v0.0.7
 	github.com/adrianliechti/wingman v0.0.0-20250526171920-f3ee649530fb
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/invopop/yaml v0.3.1
 	github.com/joho/godotenv v1.5.1
-	github.com/mark3labs/mcp-go v0.31.0
-	github.com/ncruces/go-sqlite3 v0.26.0
+	github.com/modelcontextprotocol/go-sdk v0.0.0-00010101000000-000000000000
+	github.com/ncruces/go-sqlite3 v0.26.1
 	github.com/ncruces/go-sqlite3/gormlite v0.24.0
 	github.com/rs/cors v1.11.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -90,6 +92,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mark3labs/mcp-go v0.31.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
@@ -136,13 +139,13 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.36.0 // indirect
 	go.opentelemetry.io/otel/trace v1.36.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.6.0 // indirect
-	golang.org/x/crypto v0.38.0 // indirect
+	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sync v0.15.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/term v0.32.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	google.golang.org/api v0.234.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250519155744-55703ea1f237 // indirect

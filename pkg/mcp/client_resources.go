@@ -6,14 +6,22 @@ import (
 
 	"github.com/adrianliechti/wingman-cli/pkg/resource"
 
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 func (c *Client) Resources(ctx context.Context) ([]resource.Resource, error) {
 	var result []resource.Resource
 
-	for _, c := range c.clients {
-		resp, err := c.ListResources(ctx, mcp.ListResourcesRequest{})
+	for name := range c.transports {
+		session, err := c.createSession(ctx, name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		defer session.Close()
+
+		resp, err := session.ListResources(ctx, nil)
 
 		if err != nil {
 			return nil, err
@@ -29,26 +37,34 @@ func (c *Client) Resources(ctx context.Context) ([]resource.Resource, error) {
 				ContentType: r.MIMEType,
 
 				Content: func(ctx context.Context) ([]byte, error) {
-					req := mcp.ReadResourceRequest{}
-					req.Params.URI = r.URI
-
-					result, err := c.ReadResource(ctx, req)
+					session, err := c.createSession(ctx, name)
 
 					if err != nil {
 						return nil, err
 					}
 
-					if len(result.Contents) > 1 {
+					defer session.Close()
+
+					resp, err := session.ReadResource(ctx, &mcp.ReadResourceParams{
+						URI: r.URI,
+					})
+
+					if err != nil {
+						return nil, err
+					}
+
+					if len(resp.Contents) > 1 {
 						return nil, errors.New("multiple contents not supported")
 					}
 
-					for _, content := range result.Contents {
-						switch content := content.(type) {
-						case mcp.TextResourceContents:
-							return []byte(content.Text), nil
+					if len(resp.Contents) == 1 {
+						content := resp.Contents[0]
+						if len(content.Blob) > 0 {
+							return content.Blob, nil
+						}
 
-						case mcp.BlobResourceContents:
-							return []byte(content.Blob), nil
+						if len(content.Text) > 0 {
+							return []byte(content.Text), nil
 						}
 					}
 
