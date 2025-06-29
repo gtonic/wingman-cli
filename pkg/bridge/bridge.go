@@ -63,8 +63,10 @@ func Run(ctx context.Context, client *wingman.Client, tools []tool.Tool) error {
 			}
 
 			return &mcp.CallToolResultFor[any]{
-				Content: []*mcp.Content{
-					mcp.NewTextContent(content),
+				Content: []mcp.Content{
+					&mcp.TextContent{
+						Text: content,
+					},
 				},
 			}, nil
 		}

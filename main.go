@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/wingman-cli/app"
+	"github.com/adrianliechti/wingman-cli/app/agent"
 	"github.com/adrianliechti/wingman-cli/app/bridge"
 	"github.com/adrianliechti/wingman-cli/app/chat"
 	"github.com/adrianliechti/wingman-cli/app/coder"
 	"github.com/adrianliechti/wingman-cli/app/complete"
-	"github.com/adrianliechti/wingman-cli/app/mcp"
 	"github.com/adrianliechti/wingman-cli/app/rag"
 
 	"github.com/adrianliechti/go-cli"
@@ -94,13 +94,13 @@ func initApp(client *wingman.Client) cli.Command {
 			},
 
 			{
-				Name:  "mcp",
+				Name:  "agent",
 				Usage: "MCP Agent",
 
 				HideHelp: true,
 
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return mcp.Run(ctx, client)
+					return agent.Run(ctx, client)
 				},
 			},
 

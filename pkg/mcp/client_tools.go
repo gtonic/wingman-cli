@@ -79,15 +79,14 @@ func (c *Client) Tools(ctx context.Context) ([]tool.Tool, error) {
 					}
 
 					for _, content := range resp.Content {
-						switch content.Type {
-						case "text":
-							text := strings.TrimSpace(content.Text)
-							return text, nil
-						case "image":
+						switch content := content.(type) {
+						case *mcp.TextContent:
+							return strings.TrimSpace(content.Text), nil
+						case *mcp.ImageContent:
 							return nil, errors.New("image content not supported")
-						case "audio":
+						case *mcp.AudioContent:
 							return nil, errors.New("audio content not supported")
-						case "resource":
+						case *mcp.EmbeddedResource:
 							return nil, errors.New("embedded resource not supported")
 						default:
 							return nil, errors.New("unknown content type")

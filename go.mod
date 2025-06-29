@@ -2,15 +2,12 @@ module github.com/adrianliechti/wingman-cli
 
 go 1.24.3
 
-replace github.com/modelcontextprotocol/go-sdk => github.com/findleyr/mcp v0.0.0-20250620211930-2a32e84b65e0
-
 require (
 	github.com/adrianliechti/go-cli v0.0.7
-	github.com/adrianliechti/wingman v0.0.0-20250622153731-b18af77e615f
+	github.com/adrianliechti/wingman v0.0.0-20250629160838-d52b7130c9b2
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/modelcontextprotocol/go-sdk v0.0.0-00010101000000-000000000000
-	github.com/ncruces/go-sqlite3 v0.26.1
+	github.com/ncruces/go-sqlite3 v0.26.2
 	github.com/ncruces/go-sqlite3/gormlite v0.24.0
 	github.com/rs/cors v1.11.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -27,7 +24,6 @@ require (
 	cloud.google.com/go/longrunning v0.6.7 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.1 // indirect
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
 	github.com/anthropics/anthropic-sdk-go v1.4.0 // indirect
@@ -88,12 +84,13 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
+	github.com/modelcontextprotocol/go-sdk v0.0.0-20250627194314-8a3f272dbbcf
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
-	github.com/openai/openai-go v1.6.0 // indirect
+	github.com/openai/openai-go v1.7.0 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/replicate/replicate-go v0.26.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
