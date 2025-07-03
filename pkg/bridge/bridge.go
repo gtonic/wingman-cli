@@ -2,29 +2,20 @@ package bridge
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
 
-	"github.com/adrianliechti/wingman-cli/app"
-	"github.com/adrianliechti/wingman-cli/pkg/bridge"
+	"github.com/rs/cors"
 
-	"github.com/adrianliechti/go-cli"
+	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
+
+	"github.com/adrianliechti/wingman-cli/pkg/tool"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
-func Run(ctx context.Context, client *wingman.Client) error {
-	tools := app.MustConnectTools(ctx)
-
-	//tools = util.OptimizeTools(client, app.DefaultModel, tools)
-
-	cli.Info()
-	cli.Info("🖥️ MCP Server")
-	cli.Info()
-
-	for _, tool := range tools {
-		println("🛠️ " + tool.Name)
-	}
-
-	cli.Info()
-
+func Run(ctx context.Context, client *wingman.Client, tools []tool.Tool) error {
 	s := server.NewMCPServer(
 		"Wingman MCP Server",
 		"1.0.0",
@@ -139,6 +130,4 @@ func convertArgs(val any) (map[string]any, error) {
 	return map[string]any{
 		"input": val,
 	}, nil
-
-	return bridge.Run(ctx, client, tools)
 }
