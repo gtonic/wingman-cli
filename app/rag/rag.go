@@ -8,7 +8,7 @@ import (
 	"github.com/adrianliechti/go-cli"
 	"github.com/adrianliechti/wingman-cli/app"
 	"github.com/adrianliechti/wingman-cli/pkg/agent"
-	"github.com/adrianliechti/wingman-cli/pkg/index/local"
+	"github.com/adrianliechti/wingman-cli/pkg/index"
 	"github.com/adrianliechti/wingman-cli/pkg/tool/retriever"
 
 	wingman "github.com/adrianliechti/wingman/pkg/client"
@@ -34,7 +34,7 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 
 	resources := app.MustConnectResources(ctx)
 
-	index, err := local.New(filepath.Join(root, "wingman.db"), &embeder{client})
+	index, err := index.New(filepath.Join(root, "wingman.db"), &embeder{client})
 
 	if err != nil {
 		return err

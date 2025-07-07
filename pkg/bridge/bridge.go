@@ -3,24 +3,18 @@ package bridge
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/modelcontextprotocol/go-sdk/jsonschema"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/rs/cors"
-
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
 
 	"github.com/adrianliechti/wingman-cli/pkg/tool"
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
 func Run(ctx context.Context, client *wingman.Client, tools []tool.Tool) error {
-	s := server.NewMCPServer(
-		"Wingman MCP Server",
-		"1.0.0",
-		server.WithToolCapabilities(false),
-	)
+	s := mcp.NewServer("Wingman MCP Server", "1.0.0", nil)
 
 	for _, t := range tools {
 		if _, ok := t.Schema["additionalProperties"]; !ok {
@@ -37,17 +31,16 @@ func Run(ctx context.Context, client *wingman.Client, tools []tool.Tool) error {
 			t.Schema["required"] = required
 		}
 
-		schema, _ := json.MarshalIndent(t.Schema, "", "  ")
+		data, _ := json.Marshal(t.Schema)
 
-		tool := mcp.Tool{
-			Name:        t.Name,
-			Description: t.Description,
+		schema := new(jsonschema.Schema)
 
-			RawInputSchema: schema,
+		if err := schema.UnmarshalJSON(data); err != nil {
+			return err
 		}
 
-		s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			args, err := convertArgs(request.Params.Arguments)
+		handler := func(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallToolParamsFor[any]) (*mcp.CallToolResultFor[any], error) {
+			args, err := convertArgs(params.Arguments)
 
 			if err != nil {
 				return nil, err
@@ -69,12 +62,16 @@ func Run(ctx context.Context, client *wingman.Client, tools []tool.Tool) error {
 				content = string(data)
 			}
 
-			return &mcp.CallToolResult{
+			return &mcp.CallToolResultFor[any]{
 				Content: []mcp.Content{
-					mcp.NewTextContent(content),
+					&mcp.TextContent{
+						Text: content,
+					},
 				},
 			}, nil
-		})
+		}
+
+		s.AddTools(mcp.NewServerTool(t.Name, t.Description, handler, mcp.Input(mcp.Schema(schema))))
 	}
 
 	addr := "localhost:4200"
@@ -90,12 +87,12 @@ func Run(ctx context.Context, client *wingman.Client, tools []tool.Tool) error {
 		json.NewEncoder(w).Encode(data)
 	})
 
-	h := server.NewSSEServer(s,
-		server.WithBaseURL(fmt.Sprintf("http://%s", addr)),
-	)
+	h := mcp.NewSSEHandler(func(request *http.Request) *mcp.Server {
+		return s
+	})
 
 	mux.Handle("/sse", h)
-	mux.Handle("/message", h)
+	// mux.Handle("/message", h)
 
 	server := &http.Server{
 		Addr:    addr,

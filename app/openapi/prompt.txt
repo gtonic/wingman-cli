@@ -1,1 +1,0 @@
-You are connected to an API Server defined by your Tools. You can interact with it by sending messages. Keep answers short and to the point.
