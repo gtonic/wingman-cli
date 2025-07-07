@@ -13,30 +13,24 @@ import (
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
-func Run(ctx context.Context, client *wingman.Client, tools []tool.Tool) error {
+func Run(ctx context.Context, client *wingman.Client, instructions string, tools []tool.Tool) error {
 	s := mcp.NewServer("Wingman MCP Server", "1.0.0", nil)
 
 	for _, t := range tools {
-		if _, ok := t.Schema["additionalProperties"]; !ok {
-			t.Schema["additionalProperties"] = false
-		}
-
-		if _, ok := t.Schema["required"]; !ok {
-			required := []string{}
-
-			for k := range t.Schema["properties"].(map[string]any) {
-				required = append(required, k)
-			}
-
-			t.Schema["required"] = required
-		}
-
 		data, _ := json.Marshal(t.Schema)
-
 		schema := new(jsonschema.Schema)
 
 		if err := schema.UnmarshalJSON(data); err != nil {
 			return err
+		}
+
+		if schema.Type == "object" && len(schema.Properties) == 0 {
+			properties := map[string]*jsonschema.Schema{}
+			properties["dummy_property"] = &jsonschema.Schema{
+				Type: "null",
+			}
+
+			schema.Properties = properties
 		}
 
 		handler := func(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallToolParamsFor[any]) (*mcp.CallToolResultFor[any], error) {
@@ -81,6 +75,10 @@ func Run(ctx context.Context, client *wingman.Client, tools []tool.Tool) error {
 	mux.HandleFunc("GET /.well-known/wingman", func(w http.ResponseWriter, r *http.Request) {
 		data := map[string]any{
 			"name": "wingman",
+		}
+
+		if instructions != "" {
+			data["instructions"] = instructions
 		}
 
 		w.Header().Set("Content-Type", "application/json")

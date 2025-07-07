@@ -26,10 +26,10 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 
 	root := app.MustDir()
 
-	prompt := app.MustParsePrompt()
+	instructions := app.MustParseInstructions()
 
-	if prompt == "" {
-		prompt = DefaultPrompt
+	if instructions == "" {
+		instructions = DefaultPrompt
 	}
 
 	resources := app.MustConnectResources(ctx)
@@ -56,5 +56,5 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 		return err
 	}
 
-	return agent.Run(ctx, client, model, prompt, tools)
+	return agent.Run(ctx, client, model, instructions, tools)
 }

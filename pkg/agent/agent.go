@@ -16,7 +16,7 @@ import (
 	wingman "github.com/adrianliechti/wingman/pkg/client"
 )
 
-func Run(ctx context.Context, client *wingman.Client, model, prompt string, tools []tool.Tool) error {
+func Run(ctx context.Context, client *wingman.Client, model, instructions string, tools []tool.Tool) error {
 	input := wingman.CompletionRequest{
 		Model: model,
 
@@ -25,8 +25,8 @@ func Run(ctx context.Context, client *wingman.Client, model, prompt string, tool
 		},
 	}
 
-	if prompt != "" {
-		input.Messages = append(input.Messages, wingman.SystemMessage(prompt))
+	if instructions != "" {
+		input.Messages = append(input.Messages, wingman.SystemMessage(instructions))
 	}
 
 	for {

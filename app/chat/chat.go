@@ -20,8 +20,8 @@ func Run(ctx context.Context, client *wingman.Client, model string) error {
 		},
 	}
 
-	if prompt, err := app.ParsePrompt(); err == nil {
-		input.Messages = append(input.Messages, wingman.SystemMessage(prompt))
+	if instructions := app.MustParseInstructions(); instructions != "" {
+		input.Messages = append(input.Messages, wingman.SystemMessage(instructions))
 	}
 
 	cli.Info()
