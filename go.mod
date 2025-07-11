@@ -4,14 +4,15 @@ go 1.24.3
 
 require (
 	github.com/adrianliechti/go-cli v0.0.7
-	github.com/adrianliechti/wingman v0.0.0-20250707141506-c48f5dbacdf0
+	github.com/adrianliechti/wingman v0.0.0-20250711212514-7bd081c5d68e
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/ncruces/go-sqlite3 v0.26.2
+	github.com/modelcontextprotocol/go-sdk v0.2.0
+	github.com/ncruces/go-sqlite3 v0.26.3
 	github.com/ncruces/go-sqlite3/gormlite v0.24.0
 	github.com/rs/cors v1.11.1
 	gopkg.in/yaml.v3 v3.0.1
-	gorm.io/datatypes v1.2.5
+	gorm.io/datatypes v1.2.6
 	gorm.io/gorm v1.30.0
 )
 
@@ -84,13 +85,12 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
-	github.com/modelcontextprotocol/go-sdk v0.1.0
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
-	github.com/openai/openai-go v1.8.2 // indirect
+	github.com/openai/openai-go v1.10.1 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/replicate/replicate-go v0.26.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
@@ -102,6 +102,7 @@ require (
 	github.com/urfave/cli/v3 v3.3.3 // indirect
 	github.com/vincent-petithory/dataurl v1.0.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
 	github.com/yuin/goldmark-emoji v1.0.5 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
@@ -128,7 +129,7 @@ require (
 	golang.org/x/term v0.32.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
-	google.golang.org/api v0.240.0 // indirect
+	google.golang.org/api v0.241.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/grpc v1.73.0 // indirect

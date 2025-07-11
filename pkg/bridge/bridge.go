@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/jsonschema"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -14,7 +15,18 @@ import (
 )
 
 func Run(ctx context.Context, client *wingman.Client, instructions string, tools []tool.Tool) error {
-	s := mcp.NewServer("Wingman MCP Server", "1.0.0", nil)
+	impl := &mcp.Implementation{
+		Name: "wingman",
+
+		Title:   "Wingman MCP Server",
+		Version: "1.0.0",
+	}
+
+	opts := &mcp.ServerOptions{
+		KeepAlive: time.Second * 30,
+	}
+
+	s := mcp.NewServer(impl, opts)
 
 	for _, t := range tools {
 		data, _ := json.Marshal(t.Schema)
@@ -33,17 +45,21 @@ func Run(ctx context.Context, client *wingman.Client, instructions string, tools
 			schema.Properties = properties
 		}
 
-		handler := func(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallToolParamsFor[any]) (*mcp.CallToolResultFor[any], error) {
-			args, err := convertArgs(params.Arguments)
-
-			if err != nil {
-				return nil, err
-			}
+		handler := func(ctx context.Context, session *mcp.ServerSession, params *mcp.CallToolParamsFor[map[string]any]) (*mcp.CallToolResultFor[any], error) {
+			args := params.Arguments
 
 			result, err := t.Execute(ctx, args)
 
 			if err != nil {
-				return nil, err
+				return &mcp.CallToolResultFor[any]{
+					IsError: true,
+
+					Content: []mcp.Content{
+						&mcp.TextContent{
+							Text: err.Error(),
+						},
+					},
+				}, nil
 			}
 
 			var content string
@@ -65,7 +81,14 @@ func Run(ctx context.Context, client *wingman.Client, instructions string, tools
 			}, nil
 		}
 
-		s.AddTools(mcp.NewServerTool(t.Name, t.Description, handler, mcp.Input(mcp.Schema(schema))))
+		tool := &mcp.Tool{
+			Name:        t.Name,
+			Description: t.Description,
+
+			InputSchema: schema,
+		}
+
+		s.AddTool(tool, handler)
 	}
 
 	addr := "localhost:4200"
@@ -107,22 +130,4 @@ func Run(ctx context.Context, client *wingman.Client, instructions string, tools
 	}
 
 	return nil
-}
-
-func convertArgs(val any) (map[string]any, error) {
-	data, err := json.Marshal(val)
-
-	if err != nil {
-		return nil, err
-	}
-
-	var args map[string]any
-
-	if err := json.Unmarshal(data, &args); err == nil {
-		return args, nil
-	}
-
-	return map[string]any{
-		"input": val,
-	}, nil
 }

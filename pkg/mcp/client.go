@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -94,7 +95,17 @@ func (c *Client) createSession(ctx context.Context, server string) (*mcp.ClientS
 		return nil, err
 	}
 
-	client := mcp.NewClient("wingman", "1.0.0", nil)
+	impl := &mcp.Implementation{
+		Name:    "wingman",
+		Version: "1.0.0",
+	}
+
+	opts := &mcp.ClientOptions{
+		KeepAlive: time.Second * 30,
+	}
+
+	client := mcp.NewClient(impl, opts)
+
 	return client.Connect(ctx, transport)
 }
 
